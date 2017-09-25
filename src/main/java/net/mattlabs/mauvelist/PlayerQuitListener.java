@@ -18,25 +18,28 @@ public final class PlayerQuitListener implements Listener {
 
         Player player = event.getPlayer();
 
-        if (playerData == null) {
-            String worldName = MauveList.INSTANCE.getWorldName();
-            World world = Bukkit.getServer().getWorld(worldName);
 
-            playerData = new File(world.getWorldFolder(), "playerdata");
-        }
+        if (player.hasPermission("ml.grey")) {
+            if (playerData == null) {
+                String worldName = MauveList.INSTANCE.getWorldName();
+                World world = Bukkit.getServer().getWorld(worldName);
 
-        Bukkit.getScheduler().runTask(MauveList.INSTANCE, () -> {
-            File playerFile = new File(playerData, player.getUniqueId() + ".dat");
-            playerFile.delete();
-        });
-        if (MauveList.INSTANCE.isEssentialsAvailable()) {
-            if (essentialsPlayerData == null) {
-                essentialsPlayerData = new File(MauveList.INSTANCE.getDataFolder(), "../Essentials/userdata");
+                playerData = new File(world.getWorldFolder(), "playerdata");
             }
+
             Bukkit.getScheduler().runTask(MauveList.INSTANCE, () -> {
-                File playerFile = new File(essentialsPlayerData, player.getUniqueId() + ".yml");
+                File playerFile = new File(playerData, player.getUniqueId() + ".dat");
                 playerFile.delete();
             });
+            if (MauveList.INSTANCE.isEssentialsAvailable()) {
+                if (essentialsPlayerData == null) {
+                    essentialsPlayerData = new File(MauveList.INSTANCE.getDataFolder(), "../Essentials/userdata");
+                }
+                Bukkit.getScheduler().runTask(MauveList.INSTANCE, () -> {
+                    File playerFile = new File(essentialsPlayerData, player.getUniqueId() + ".yml");
+                    playerFile.delete();
+                });
+            }
         }
     }
 }
