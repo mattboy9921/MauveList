@@ -14,10 +14,9 @@ public final class PlayerQuitListener implements Listener {
     private File playerData = null, essentialsPlayerData = null;
 
     @EventHandler
-    public void onLogoff(PlayerQuitEvent event) {
+    public void onPlayerQuit(PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
-
 
         if (player.hasPermission("ml.grey")) {
             if (playerData == null) {
@@ -26,19 +25,19 @@ public final class PlayerQuitListener implements Listener {
 
                 playerData = new File(world.getWorldFolder(), "playerdata");
             }
-
             Bukkit.getScheduler().runTask(MauveList.INSTANCE, () -> {
                 File playerFile = new File(playerData, player.getUniqueId() + ".dat");
                 playerFile.delete();
             });
+
             if (MauveList.INSTANCE.isEssentialsAvailable()) {
                 if (essentialsPlayerData == null) {
-                    essentialsPlayerData = new File(MauveList.INSTANCE.getDataFolder(), "../Essentials/userdata");
+                    essentialsPlayerData = new File(MauveList.INSTANCE.getDataFolder().getParentFile(), "Essentials/userdata");
                 }
-                Bukkit.getScheduler().runTask(MauveList.INSTANCE, () -> {
+                Bukkit.getScheduler().runTaskLater(MauveList.INSTANCE, () -> {
                     File playerFile = new File(essentialsPlayerData, player.getUniqueId() + ".yml");
                     playerFile.delete();
-                });
+                }, 10);
             }
         }
     }
