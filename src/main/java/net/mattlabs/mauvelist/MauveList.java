@@ -1,6 +1,7 @@
 package net.mattlabs.mauvelist;
 
 import co.aikar.commands.PaperCommandManager;
+import net.mattlabs.mauvelist.commands.MauveListCommand;
 import net.mattlabs.mauvelist.listeners.JoinListener;
 import net.mattlabs.mauvelist.listeners.QuitListener;
 import org.bukkit.Bukkit;
@@ -20,6 +21,7 @@ public class MauveList extends JavaPlugin {
     private String world;
     private Queue<UUID> nonMomberList = new LinkedList<>();
     public static MauveList INSTANCE = null;
+    public PaperCommandManager paperCommandManager;
 
     public void onEnable() {
 
@@ -28,12 +30,15 @@ public class MauveList extends JavaPlugin {
         List<World> worlds = Bukkit.getWorlds();
         world = worlds.get(0).getName();
 
+        // Register ACF
+        paperCommandManager = new PaperCommandManager(this);
+
         // Register listeners
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
 
         // Register commands with ACF
-
+        paperCommandManager.registerCommand(new MauveListCommand());
 
         // EssentialsX support
         if (isEssentialsAvailable()) getLogger().log(Level.INFO, "Essentials found - Enabling support...");
