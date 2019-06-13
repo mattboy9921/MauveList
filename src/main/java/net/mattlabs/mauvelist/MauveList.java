@@ -5,13 +5,17 @@ import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public class MauveList extends JavaPlugin {
 
     private boolean essentials;
     private String world;
+    private Queue<UUID> nonMomberList = new LinkedList<>();
     public static MauveList INSTANCE = null;
 
     public void onEnable() {
@@ -30,6 +34,10 @@ public class MauveList extends JavaPlugin {
 
     public void onDisable() {
 
+    }
+
+    public Queue getNonMemberList() {
+        return nonMomberList;
     }
 
     public boolean isEssentialsAvailable() {
