@@ -1,5 +1,8 @@
 package net.mattlabs.mauvelist;
 
+import co.aikar.commands.PaperCommandManager;
+import net.mattlabs.mauvelist.listeners.JoinListener;
+import net.mattlabs.mauvelist.listeners.QuitListener;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,10 +28,16 @@ public class MauveList extends JavaPlugin {
         List<World> worlds = Bukkit.getWorlds();
         world = worlds.get(0).getName();
 
-        getServer().getPluginManager().registerEvents(new PlayerQuitListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
+        // Register listeners
+        getServer().getPluginManager().registerEvents(new QuitListener(), this);
+        getServer().getPluginManager().registerEvents(new JoinListener(), this);
 
+        // Register commands with ACF
+
+
+        // EssentialsX support
         if (isEssentialsAvailable()) getLogger().log(Level.INFO, "Essentials found - Enabling support...");
+
         getLogger().log(Level.INFO, "MauveList loaded - By mattboy9921 (Special thanks to RoyCurtis)");
     }
 

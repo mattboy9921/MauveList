@@ -1,5 +1,6 @@
-package net.mattlabs.mauvelist;
+package net.mattlabs.mauvelist.listeners;
 
+import net.mattlabs.mauvelist.MauveList;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -9,7 +10,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.io.File;
 
-public final class PlayerQuitListener implements Listener {
+public final class QuitListener implements Listener {
 
     private File playerData = null, essentialsPlayerData = null;
 
