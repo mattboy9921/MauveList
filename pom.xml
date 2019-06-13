@@ -33,19 +33,19 @@
     <!-- Project dependencies -->
 
     <repositories>
-        <!-- For Spigot + Bukkit API -->
+        <!-- For Paper API -->
         <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/public/</url>
+            <id>papermc</id>
+            <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
     </repositories>
 
     <dependencies>
-        <!-- Spigot + Bukkit API -->
+        <!-- For Paper API -->
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.13.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -98,6 +98,30 @@
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <delete>
+                                    <fileset dir="${basedir}\..\..\Test Server\plugins" includes="${artifactId}-*.jar" />
+                                </delete>
+                                <echo>Copying ${artifactId}-${version}.jar to test server...</echo>
+                                <copy todir="${basedir}\..\..\Test Server\plugins" overwrite="true" flatten="true">
+                                    <fileset dir="${basedir}/target" includes="${artifactId}-${version}.jar" />
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
