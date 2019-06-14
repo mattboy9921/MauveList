@@ -4,14 +4,15 @@ import co.aikar.commands.PaperCommandManager;
 import net.mattlabs.mauvelist.commands.MauveListCommand;
 import net.mattlabs.mauvelist.listeners.JoinListener;
 import net.mattlabs.mauvelist.listeners.QuitListener;
+import net.mattlabs.mauvelist.util.ConfigManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -19,9 +20,10 @@ public class MauveList extends JavaPlugin {
 
     private boolean essentials;
     private String world;
-    private Queue<UUID> nonMomberList = new LinkedList<>();
+    private LinkedList<UUID> nonMomberList = new LinkedList<>();
     public static MauveList INSTANCE = null;
     public PaperCommandManager paperCommandManager;
+    private ConfigManager configManager;
 
     public void onEnable() {
 
@@ -29,6 +31,20 @@ public class MauveList extends JavaPlugin {
         essentials = new File(getDataFolder().getParentFile(), "Essentials").isDirectory();
         List<World> worlds = Bukkit.getWorlds();
         world = worlds.get(0).getName();
+
+        // Configuration Section
+        configManager = new ConfigManager(this);
+        configManager.loadConfigFiles(
+                new ConfigManager.ConfigPath(
+                        "data.yml",
+                        "data.yml",
+                        "data.yml"));
+        configManager.saveAllConfigs(false);
+
+        // Load Player Data
+        ArrayList<String> loadList = (ArrayList<String>) configManager.getFileConfig("data.yml").getStringList("nonMemberList");
+        for (String string : loadList) nonMomberList.add(UUID.fromString(string));
+        this.getLogger().info(nonMomberList.toString());
 
         // Register ACF
         paperCommandManager = new PaperCommandManager(this);
@@ -50,8 +66,12 @@ public class MauveList extends JavaPlugin {
 
     }
 
-    public Queue getNonMemberList() {
+    public LinkedList<UUID> getNonMemberList() {
         return nonMomberList;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 
     public boolean isEssentialsAvailable() {
