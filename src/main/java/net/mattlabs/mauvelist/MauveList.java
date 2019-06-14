@@ -21,13 +21,13 @@ public class MauveList extends JavaPlugin {
     private boolean essentials;
     private String world;
     private LinkedList<UUID> nonMomberList = new LinkedList<>();
-    public static MauveList INSTANCE = null;
+    private static MauveList instance;
     public PaperCommandManager paperCommandManager;
     private ConfigManager configManager;
 
     public void onEnable() {
 
-        INSTANCE = this;
+        instance = this;
         essentials = new File(getDataFolder().getParentFile(), "Essentials").isDirectory();
         List<World> worlds = Bukkit.getWorlds();
         world = worlds.get(0).getName();
@@ -64,6 +64,10 @@ public class MauveList extends JavaPlugin {
 
     public void onDisable() {
 
+    }
+
+    public static MauveList getInstance() {
+        return instance;
     }
 
     public LinkedList<UUID> getNonMemberList() {

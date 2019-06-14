@@ -15,8 +15,8 @@ import java.util.UUID;
 
 public class JoinListener implements Runnable, Listener {
 
-    private LinkedList<UUID> nonMemberList = MauveList.INSTANCE.getNonMemberList();
-    private ConfigManager configManager = MauveList.INSTANCE.getConfigManager();
+    private LinkedList<UUID> nonMemberList = MauveList.getInstance().getNonMemberList();
+    private ConfigManager configManager = MauveList.getInstance().getConfigManager();
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -30,7 +30,7 @@ public class JoinListener implements Runnable, Listener {
             nonMemberList.addFirst(player.getUniqueId());
             if (nonMemberList.size() == 11) nonMemberList.removeLast();
 
-            Bukkit.getServer().getScheduler().runTaskAsynchronously(MauveList.INSTANCE, this);
+            Bukkit.getServer().getScheduler().runTaskAsynchronously(MauveList.getInstance(), this);
         }
     }
 
