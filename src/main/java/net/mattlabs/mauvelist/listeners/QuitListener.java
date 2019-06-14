@@ -21,21 +21,21 @@ public final class QuitListener implements Listener {
 
         if (player.hasPermission("ml.grey")) {
             if (playerData == null) {
-                String worldName = MauveList.INSTANCE.getWorldName();
+                String worldName = MauveList.getInstance().getWorldName();
                 World world = Bukkit.getServer().getWorld(worldName);
 
                 playerData = new File(world.getWorldFolder(), "playerdata");
             }
-            Bukkit.getScheduler().runTask(MauveList.INSTANCE, () -> {
+            Bukkit.getScheduler().runTask(MauveList.getInstance(), () -> {
                 File playerFile = new File(playerData, player.getUniqueId() + ".dat");
                 playerFile.delete();
             });
 
-            if (MauveList.INSTANCE.isEssentialsAvailable()) {
+            if (MauveList.getInstance().isEssentialsAvailable()) {
                 if (essentialsPlayerData == null) {
-                    essentialsPlayerData = new File(MauveList.INSTANCE.getDataFolder().getParentFile(), "Essentials/userdata");
+                    essentialsPlayerData = new File(MauveList.getInstance().getDataFolder().getParentFile(), "Essentials/userdata");
                 }
-                Bukkit.getScheduler().runTaskLater(MauveList.INSTANCE, () -> {
+                Bukkit.getScheduler().runTaskLater(MauveList.getInstance(), () -> {
                     File playerFile = new File(essentialsPlayerData, player.getUniqueId() + ".yml");
                     playerFile.delete();
                 }, 10);
