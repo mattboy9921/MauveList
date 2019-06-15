@@ -14,7 +14,7 @@ import java.util.UUID;
 public class PlayerManager implements Runnable{
 
     private ConfigManager configManager;
-    private LinkedList<UUID> nonMemberList, nonMemberUUID;
+    private LinkedList<UUID> nonMemberUUID;
     private LinkedList<String> nonMemberName, nonMemberDate;
 
     public PlayerManager() {
@@ -33,7 +33,6 @@ public class PlayerManager implements Runnable{
     }
 
     public void loadPlayerData() {
-        nonMemberList = new LinkedList<>();
         nonMemberUUID = new LinkedList<>();
         nonMemberName = new LinkedList<>();
         nonMemberDate = new LinkedList<>();
@@ -58,10 +57,6 @@ public class PlayerManager implements Runnable{
 
     public LinkedList<String> getNonMemberDate() {
         return nonMemberDate;
-    }
-
-    public LinkedList<UUID> getNonMemberList() {
-        return nonMemberList;
     }
 
     // Saves data to file asynchronously
