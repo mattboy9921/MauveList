@@ -6,8 +6,10 @@ import net.mattlabs.mauvelist.listeners.JoinListener;
 import net.mattlabs.mauvelist.listeners.QuitListener;
 import net.mattlabs.mauvelist.util.ConfigManager;
 import net.mattlabs.mauvelist.util.PlayerManager;
+import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -22,6 +24,7 @@ public class MauveList extends JavaPlugin {
     public PaperCommandManager paperCommandManager;
     private ConfigManager configManager;
     private PlayerManager playerManager;
+    private static Permission permission = null;
 
     public void onEnable() {
 
@@ -29,6 +32,21 @@ public class MauveList extends JavaPlugin {
         essentials = new File(getDataFolder().getParentFile(), "Essentials").isDirectory();
         List<World> worlds = Bukkit.getWorlds();
         world = worlds.get(0).getName();
+
+        // Vault Check
+        if (!hasVault()) {
+            this.getLogger().severe(String.format("Disabled due to no Vault dependency found!"));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        // Vault Setup
+        if (!setupPermissions()) {
+            this.getLogger().severe(String.format("Disabled due to Vault Permissions error!"));
+            this.getLogger().severe(String.format("Is there a permission plugin installed?"));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         // Configuration Section
         configManager = new ConfigManager(this);
@@ -75,11 +93,30 @@ public class MauveList extends JavaPlugin {
         return configManager;
     }
 
+    public static Permission getPermission() {
+        return permission;
+    }
+
     public boolean isEssentialsAvailable() {
         return essentials;
     }
 
     public String getWorldName() {
         return world;
+    }
+
+    // Vault Helper Methods
+
+    private boolean hasVault() {
+        return getServer().getPluginManager().getPlugin("Vault") != null;
+    }
+
+    private boolean setupPermissions() {
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        if (rsp != null) {
+            permission = rsp.getProvider();
+            return permission != null;
+        }
+        else return false;
     }
 }
