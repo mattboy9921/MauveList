@@ -55,8 +55,23 @@ public class Messages {
                     .bold(true)
                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                             new ComponentBuilder("Click here to add " + name + " as a member.").create()))
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/placeholder"))
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ml add " + name))
                 .create();
     }
 
+    public static BaseComponent[] nowAMember(String name) {
+        // [MauveList] %name% is now a member!
+        return new ComponentBuilder("[")
+                    .color(GRAY)
+                .append("MauveList")
+                    .color(DARK_PURPLE)
+                .append("] ")
+                    .color(GRAY)
+                .append(name)
+                    .color(WHITE)
+                    .bold(true)
+                .append(" is now a member!")
+                    .reset()
+                .create();
+    }
 }
