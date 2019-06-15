@@ -24,4 +24,21 @@ public class MauveListCommand extends BaseCommand {
                 Bukkit.getPluginManager().getPlugin("MauveList").getDescription().getVersion());
         else commandSender.spigot().sendMessage(Messages.version());
     }
+
+    @Subcommand("list")
+    @Description("Shows last 10 joined nonmembers.")
+    public void onList(CommandSender commandSender) {
+        LinkedList<String> nonMemberName = playerManager.getNonMemberName();
+        if (!(commandSender instanceof Player)) {
+            MauveList.getInstance().getLogger().info("Last 10 nonmembers:");
+            for (String name : nonMemberName) MauveList.getInstance().getLogger().info(" - " + name);
+        }
+        else {
+            commandSender.spigot().sendMessage(Messages.lastTenMembersHeading());
+            for (int i = 0; i < playerManager.getNonMemberName().size(); i++)
+                commandSender.spigot().sendMessage(Messages.lastTenMembersListing(
+                        playerManager.getNonMemberName().get(i),
+                        playerManager.getNonMemberUUID().get(i).toString()));
+        }
+    }
 }
