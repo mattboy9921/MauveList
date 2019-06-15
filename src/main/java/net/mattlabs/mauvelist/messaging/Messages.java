@@ -40,14 +40,16 @@ public class Messages {
                 .create();
     }
 
-    public static BaseComponent[] lastTenMembersListing(String name, String uuid) {
+    public static BaseComponent[] lastTenMembersListing(String name, String uuid, String lastJoin) {
         //  - %name% <hover UUID> [Accept]
         return new ComponentBuilder(" - ")
                     .color(DARK_PURPLE)
                 .append(name + " ")
                     .color(WHITE)
                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new ComponentBuilder(uuid).create()))
+                            new ComponentBuilder("Last seen: " + lastJoin +
+                                    "\n" + uuid)
+                                    .create()))
                 .append("[Accept]")
                     .color(BLUE)
                     .bold(true)

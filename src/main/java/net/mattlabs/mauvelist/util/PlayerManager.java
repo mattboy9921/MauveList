@@ -4,7 +4,10 @@ import net.mattlabs.mauvelist.MauveList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.UUID;
 
@@ -12,7 +15,7 @@ public class PlayerManager implements Runnable{
 
     private ConfigManager configManager;
     private LinkedList<UUID> nonMemberList, nonMemberUUID;
-    private LinkedList<String> nonMemberName;
+    private LinkedList<String> nonMemberName, nonMemberDate;
 
     public PlayerManager() {
         configManager = MauveList.getInstance().getConfigManager();
@@ -33,11 +36,15 @@ public class PlayerManager implements Runnable{
         nonMemberList = new LinkedList<>();
         nonMemberUUID = new LinkedList<>();
         nonMemberName = new LinkedList<>();
+        nonMemberDate = new LinkedList<>();
         ArrayList<String> loadList = (ArrayList<String>) configManager.getFileConfig("data.yml").getStringList("nonMemberList");
         for (String string : loadList) {
             String[] parts = string.split("\\|");
             nonMemberUUID.add(UUID.fromString(parts[0]));
             nonMemberName.add(parts[1]);
+            Date date = new Date(Bukkit.getOfflinePlayer(UUID.fromString(parts[0])).getLastLogin());
+            DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
+            nonMemberDate.add(dateFormat.format(date));
         }
     }
 
@@ -47,6 +54,10 @@ public class PlayerManager implements Runnable{
 
     public LinkedList<String> getNonMemberName() {
         return nonMemberName;
+    }
+
+    public LinkedList<String> getNonMemberDate() {
+        return nonMemberDate;
     }
 
     public LinkedList<UUID> getNonMemberList() {

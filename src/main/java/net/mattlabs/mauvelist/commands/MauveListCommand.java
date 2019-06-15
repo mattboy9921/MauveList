@@ -38,7 +38,8 @@ public class MauveListCommand extends BaseCommand {
             for (int i = 0; i < playerManager.getNonMemberName().size(); i++)
                 commandSender.spigot().sendMessage(Messages.lastTenMembersListing(
                         playerManager.getNonMemberName().get(i),
-                        playerManager.getNonMemberUUID().get(i).toString()));
+                        playerManager.getNonMemberUUID().get(i).toString(),
+                        playerManager.getNonMemberDate().get(i)));
         }
     }
 }
