@@ -5,25 +5,23 @@ import net.mattlabs.mauvelist.commands.MauveListCommand;
 import net.mattlabs.mauvelist.listeners.JoinListener;
 import net.mattlabs.mauvelist.listeners.QuitListener;
 import net.mattlabs.mauvelist.util.ConfigManager;
+import net.mattlabs.mauvelist.util.PlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 
 public class MauveList extends JavaPlugin {
 
     private boolean essentials;
     private String world;
-    private LinkedList<UUID> nonMomberList = new LinkedList<>();
     private static MauveList instance;
     public PaperCommandManager paperCommandManager;
     private ConfigManager configManager;
+    private PlayerManager playerManager;
 
     public void onEnable() {
 
@@ -41,10 +39,9 @@ public class MauveList extends JavaPlugin {
                         "data.yml"));
         configManager.saveAllConfigs(false);
 
-        // Load Player Data
-        ArrayList<String> loadList = (ArrayList<String>) configManager.getFileConfig("data.yml").getStringList("nonMemberList");
-        for (String string : loadList) nonMomberList.add(UUID.fromString(string));
-        this.getLogger().info(nonMomberList.toString());
+        // Load Player Manager
+        playerManager = new PlayerManager();
+        playerManager.loadPlayerData();
 
         // Register ACF
         paperCommandManager = new PaperCommandManager(this);
@@ -70,8 +67,8 @@ public class MauveList extends JavaPlugin {
         return instance;
     }
 
-    public LinkedList<UUID> getNonMemberList() {
-        return nonMomberList;
+    public PlayerManager getPlayerManager() {
+        return playerManager;
     }
 
     public ConfigManager getConfigManager() {
