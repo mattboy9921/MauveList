@@ -1,0 +1,4 @@
+# Mauvelist Config
+
+# The group to set nonmembers to when added (the members group)
+member-group: "mauve"

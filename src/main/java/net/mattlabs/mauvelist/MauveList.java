@@ -52,6 +52,10 @@ public class MauveList extends JavaPlugin {
         configManager = new ConfigManager(this);
         configManager.loadConfigFiles(
                 new ConfigManager.ConfigPath(
+                        "config.yml",
+                        "config.yml",
+                        "config.yml"),
+                new ConfigManager.ConfigPath(
                         "data.yml",
                         "data.yml",
                         "data.yml"));

@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.messaging.Messages;
+import net.mattlabs.mauvelist.util.ConfigManager;
 import net.mattlabs.mauvelist.util.PlayerManager;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -17,6 +18,7 @@ import java.util.LinkedList;
 public class MauveListCommand extends BaseCommand {
 
     PlayerManager playerManager = MauveList.getInstance().getPlayerManager();
+    ConfigManager configManager = MauveList.getInstance().getConfigManager();
     Permission permission = MauveList.getPermission();
 
     @Default
@@ -48,7 +50,8 @@ public class MauveListCommand extends BaseCommand {
     @Subcommand("add")
     @Description("Adds specified player to member list.")
     public void onAdd(CommandSender commandSender, String name) {
-        permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name), "noob");
+        permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name),
+                configManager.getFileConfig("config.yml").getString("member-group"));
         if (!(commandSender instanceof Player)) MauveList.getInstance().getLogger().info(name + " is now a member!");
         else commandSender.spigot().sendMessage(Messages.nowAMember(name));
     }
