@@ -29,6 +29,14 @@ public class MauveListCommand extends BaseCommand {
         else commandSender.spigot().sendMessage(Messages.version());
     }
 
+    @Subcommand("reload")
+    @Description("Reloads configuration.")
+    public void onReload(CommandSender commandSender) {
+        configManager.reloadConfig("config.yml");
+        if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.reloaded());
+        MauveList.getInstance().getLogger().info("Configuration reloaded.");
+    }
+
     @Subcommand("list")
     @Description("Shows last 10 joined nonmembers.")
     public void onList(CommandSender commandSender) {

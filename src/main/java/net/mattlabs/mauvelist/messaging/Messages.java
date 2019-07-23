@@ -87,4 +87,17 @@ public class Messages {
                     .color(WHITE)
                 .create();
     }
+
+    public static BaseComponent[] reloaded() {
+        // [MauveList] Configuration reloaded.
+        return new ComponentBuilder("[")
+                    .color(GRAY)
+                .append("MauveList")
+                    .color(DARK_PURPLE)
+                .append("] ")
+                    .color(GRAY)
+                .append("Configuration reloaded.")
+                    .color(WHITE)
+                .create();
+    }
 }
