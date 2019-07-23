@@ -50,9 +50,15 @@ public class MauveListCommand extends BaseCommand {
     @Subcommand("add")
     @Description("Adds specified player to member list.")
     public void onAdd(CommandSender commandSender, String name) {
-        permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name),
+        boolean addError = permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name),
                 configManager.getFileConfig("config.yml").getString("member-group"));
-        if (!(commandSender instanceof Player)) MauveList.getInstance().getLogger().info(name + " is now a member!");
-        else commandSender.spigot().sendMessage(Messages.nowAMember(name));
+        if (!addError) {
+            if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.couldNotAdd());
+            MauveList.getInstance().getLogger().warning("Could not add member, check member-group in config!");
+        }
+        else {
+            if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.nowAMember(name));
+            MauveList.getInstance().getLogger().info(name + " is now a member!");
+        }
     }
 }

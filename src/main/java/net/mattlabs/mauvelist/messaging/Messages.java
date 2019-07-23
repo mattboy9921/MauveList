@@ -74,4 +74,17 @@ public class Messages {
                     .reset()
                 .create();
     }
+
+    public static BaseComponent[] couldNotAdd() {
+        // [MauveList] Could not add member, check member-group in config!!
+        return new ComponentBuilder("[")
+                    .color(GRAY)
+                .append("MauveList")
+                    .color(DARK_PURPLE)
+                .append("] ")
+                    .color(GRAY)
+                .append("Could not add member, check member-group in config!")
+                    .color(WHITE)
+                .create();
+    }
 }
