@@ -5,5 +5,5 @@ description: ${project.description}
 author: mattboy9921 (mattboy9921@aim.com)
 main: net.mattlabs.mauvelist.MauveList
 permissions:
-  ml.grey:
+  mauvelist.grey:
     description: Makes user part of the greylist and deletes their player data on quit.
