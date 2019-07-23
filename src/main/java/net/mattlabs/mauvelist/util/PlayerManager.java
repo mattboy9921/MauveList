@@ -29,6 +29,13 @@ public class PlayerManager implements Runnable{
         nonMemberUUID.addFirst(player.getUniqueId());
         if (nonMemberUUID.size() == 11) nonMemberUUID.removeLast();
 
+        Date date = new Date(player.getLastLogin());
+        DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
+        nonMemberDate.remove(dateFormat.format(date));
+        nonMemberDate.addFirst(dateFormat.format(date));
+        if (nonMemberDate.size() == 11) nonMemberDate.removeLast();
+
+
         Bukkit.getServer().getScheduler().runTaskAsynchronously(MauveList.getInstance(), this);
     }
 
@@ -41,9 +48,7 @@ public class PlayerManager implements Runnable{
             String[] parts = string.split("\\|");
             nonMemberUUID.add(UUID.fromString(parts[0]));
             nonMemberName.add(parts[1]);
-            Date date = new Date(Bukkit.getOfflinePlayer(UUID.fromString(parts[0])).getLastLogin());
-            DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
-            nonMemberDate.add(dateFormat.format(date));
+            nonMemberDate.add(parts[2]);
         }
     }
 
@@ -63,7 +68,7 @@ public class PlayerManager implements Runnable{
     @Override
     public void run() {
         ArrayList<String> saveList = new ArrayList<>();
-        for (int i = 0; i < nonMemberName.size(); i++) saveList.add(nonMemberUUID.get(i) + "|" + nonMemberName.get(i));
+        for (int i = 0; i < nonMemberName.size(); i++) saveList.add(nonMemberUUID.get(i) + "|" + nonMemberName.get(i) + "|" + nonMemberDate.get(i));
 
         configManager.getFileConfig("data.yml").set("nonMemberList", saveList);
         configManager.saveConfig("data.yml");
