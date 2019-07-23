@@ -19,7 +19,7 @@ public final class QuitListener implements Listener {
 
         Player player = event.getPlayer();
 
-        if (player.hasPermission("ml.grey")) {
+        if (player.hasPermission("mauvelist.grey")) {
             if (playerData == null) {
                 String worldName = MauveList.getInstance().getWorldName();
                 World world = Bukkit.getServer().getWorld(worldName);

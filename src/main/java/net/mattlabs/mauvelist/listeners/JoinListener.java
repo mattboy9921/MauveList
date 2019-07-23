@@ -17,7 +17,7 @@ public class JoinListener implements Listener {
 
         Player player = event.getPlayer();
 
-        if (player.hasPermission("ml.grey")) {
+        if (player.hasPermission("mauvelist.grey")) {
             player.setGameMode(GameMode.SPECTATOR);
 
             playerManager.addPlayer(player);
