@@ -58,6 +58,7 @@ public class MauveListCommand extends BaseCommand {
     @Subcommand("add")
     @Description("Adds specified player to member list.")
     public void onAdd(CommandSender commandSender, String name) {
+        if (Bukkit.getOfflinePlayer(name).isOnline()) Bukkit.getPlayer(name).kickPlayer("Rejoin in 30 seconds, you are now a member!");
         boolean addError = permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name),
                 configManager.getFileConfig("config.yml").getString("member-group"));
         if (!addError) {
