@@ -3,6 +3,7 @@ package net.mattlabs.mauvelist;
 import co.aikar.commands.PaperCommandManager;
 import net.mattlabs.mauvelist.commands.MauveListCommand;
 import net.mattlabs.mauvelist.listeners.JoinListener;
+import net.mattlabs.mauvelist.listeners.KickListener;
 import net.mattlabs.mauvelist.listeners.QuitListener;
 import net.mattlabs.mauvelist.util.ConfigManager;
 import net.mattlabs.mauvelist.util.PlayerManager;
@@ -71,6 +72,7 @@ public class MauveList extends JavaPlugin {
         // Register listeners
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
+        getServer().getPluginManager().registerEvents(new KickListener(), this);
 
         // Register commands with ACF
         paperCommandManager.registerCommand(new MauveListCommand());
