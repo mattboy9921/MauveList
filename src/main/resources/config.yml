@@ -2,3 +2,7 @@
 
 # The group to set nonmembers to when added (the members group)
 member-group: "mauve"
+
+# Whether to set the player to the new group or just add them
+# Possible values: set, add
+permission-type: "set"
