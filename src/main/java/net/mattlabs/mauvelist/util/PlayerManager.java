@@ -1,5 +1,6 @@
 package net.mattlabs.mauvelist.util;
 
+import net.mattlabs.configmanager.ConfigManager;
 import net.mattlabs.mauvelist.MauveList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

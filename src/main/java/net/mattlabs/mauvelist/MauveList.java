@@ -1,11 +1,11 @@
 package net.mattlabs.mauvelist;
 
 import co.aikar.commands.PaperCommandManager;
+import net.mattlabs.configmanager.ConfigManager;
 import net.mattlabs.mauvelist.commands.MauveListCommand;
 import net.mattlabs.mauvelist.listeners.JoinListener;
 import net.mattlabs.mauvelist.listeners.KickListener;
 import net.mattlabs.mauvelist.listeners.QuitListener;
-import net.mattlabs.mauvelist.util.ConfigManager;
 import net.mattlabs.mauvelist.util.PlayerManager;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;

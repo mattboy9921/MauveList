@@ -48,6 +48,11 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <!-- For ConfigManager -->
+        <repository>
+            <id>configmanager-repo</id>
+            <url>http://repo.mattlabs.net/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -70,6 +75,12 @@
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- For ConfigManager -->
+        <dependency>
+            <groupId>net.mattlabs.configmanager</groupId>
+            <artifactId>ConfigManager</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

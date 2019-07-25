@@ -2,9 +2,9 @@ package net.mattlabs.mauvelist.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import net.mattlabs.configmanager.ConfigManager;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.messaging.Messages;
-import net.mattlabs.mauvelist.util.ConfigManager;
 import net.mattlabs.mauvelist.util.PlayerManager;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
