@@ -36,15 +36,15 @@ public class MauveList extends JavaPlugin {
 
         // Vault Check
         if (!hasVault()) {
-            this.getLogger().severe(String.format("Disabled due to no Vault dependency found!"));
+            this.getLogger().severe("Disabled due to no Vault dependency found!");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
         // Vault Setup
         if (!setupPermissions()) {
-            this.getLogger().severe(String.format("Disabled due to Vault Permissions error!"));
-            this.getLogger().severe(String.format("Is there a permission plugin installed?"));
+            this.getLogger().severe("Disabled due to Vault Permissions error!");
+            this.getLogger().severe("Is there a permission plugin installed?");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
