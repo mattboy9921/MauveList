@@ -19,7 +19,7 @@ public class MauveListCommand extends BaseCommand {
 
     PlayerManager playerManager = MauveList.getInstance().getPlayerManager();
     ConfigManager configManager = MauveList.getInstance().getConfigManager();
-    Permission permission = MauveList.getPermission();
+    private Permission permission = MauveList.getPermission();
 
     @Default
     @Description("MauveList base command.")
@@ -58,23 +58,17 @@ public class MauveListCommand extends BaseCommand {
     @Subcommand("add")
     @Description("Adds specified player to member list.")
     public void onAdd(CommandSender commandSender, String name) {
-        boolean addError = permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name),
-                configManager.getFileConfig("config.yml").getString("member-group"));
-        if (configManager.getFileConfig("config.yml").getString("permission-type").equalsIgnoreCase("set")) {
-            String[] groups = permission.getPlayerGroups(null, Bukkit.getOfflinePlayer(name));
-            for (String group : groups) {
-                if (!(configManager.getFileConfig("config.yml").getString("member-group").equals(group)))
-                    permission.playerRemoveGroup(null, Bukkit.getOfflinePlayer(name), group);
+        MauveList.getInstance().getServer().getScheduler().runTaskAsynchronously(MauveList.getInstance(), () -> {
+            if (!(permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name),
+                    configManager.getFileConfig("config.yml").getString("member-group")))) {
+                if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.couldNotAdd());
+                MauveList.getInstance().getLogger().warning("Could not add member, check member-group in config!");
             }
-        }
-        if (!addError) {
-            if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.couldNotAdd());
-            MauveList.getInstance().getLogger().warning("Could not add member, check member-group in config!");
-        }
-        else {
-            if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.nowAMember(name));
-            MauveList.getInstance().getLogger().info(name + " is now a member!");
-            if (Bukkit.getOfflinePlayer(name).isOnline()) Bukkit.getPlayer(name).kickPlayer("Rejoin in 30 seconds, you are now a member!");
-        }
+            else {
+                if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.nowAMember(name));
+                MauveList.getInstance().getLogger().info(name + " is now a member!");
+                if (Bukkit.getOfflinePlayer(name).isOnline()) Bukkit.getPlayer(name).kickPlayer("Rejoin in 30 seconds, you are now a member!");
+            }
+        });
     }
 }
