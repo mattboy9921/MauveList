@@ -67,7 +67,9 @@ public class MauveListCommand extends BaseCommand {
             else {
                 if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.nowAMember(name));
                 MauveList.getInstance().getLogger().info(name + " is now a member!");
-                if (Bukkit.getOfflinePlayer(name).isOnline()) Bukkit.getPlayer(name).kickPlayer("Rejoin in 30 seconds, you are now a member!");
+                if (Bukkit.getOfflinePlayer(name).isOnline()) MauveList.getInstance().getServer().getScheduler().runTask(MauveList.getInstance(), () -> {
+                    Bukkit.getPlayer(name).kickPlayer("Rejoin in 30 seconds, you are now a member!");
+                });
             }
         });
     }
