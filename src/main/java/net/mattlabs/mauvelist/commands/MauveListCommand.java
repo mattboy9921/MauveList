@@ -59,6 +59,13 @@ public class MauveListCommand extends BaseCommand {
     @Description("Adds specified player to member list.")
     public void onAdd(CommandSender commandSender, String name) {
         MauveList.getInstance().getServer().getScheduler().runTaskAsynchronously(MauveList.getInstance(), () -> {
+            if (configManager.getFileConfig("config.yml").getString("permission-type").equalsIgnoreCase("set")) {
+                String[] groups = permission.getPlayerGroups(null, Bukkit.getOfflinePlayer(name));
+                for (String group : groups) {
+                    if (!(configManager.getFileConfig("config.yml").getString("member-group").equals(group)))
+                        permission.playerRemoveGroup(null, Bukkit.getOfflinePlayer(name), group);
+                }
+            }
             if (!(permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name),
                     configManager.getFileConfig("config.yml").getString("member-group")))) {
                 if (commandSender instanceof Player) commandSender.spigot().sendMessage(Messages.couldNotAdd());
