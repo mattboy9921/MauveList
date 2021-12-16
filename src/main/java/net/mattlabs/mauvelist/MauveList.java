@@ -1,11 +1,14 @@
 package net.mattlabs.mauvelist;
 
 import co.aikar.commands.PaperCommandManager;
-import net.mattlabs.configmanager.ConfigManager;
+import io.leangen.geantyref.TypeToken;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.mattlabs.mauvelist.commands.MauveListCommand;
 import net.mattlabs.mauvelist.listeners.JoinListener;
 import net.mattlabs.mauvelist.listeners.KickListener;
 import net.mattlabs.mauvelist.listeners.QuitListener;
+import net.mattlabs.mauvelist.messaging.Messages;
+import net.mattlabs.mauvelist.util.ConfigurateManager;
 import net.mattlabs.mauvelist.util.PlayerManager;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -23,9 +26,13 @@ public class MauveList extends JavaPlugin {
     private String world;
     private static MauveList instance;
     public PaperCommandManager paperCommandManager;
-    private ConfigManager configManager;
     private PlayerManager playerManager;
     private static Permission permission = null;
+    private ConfigurateManager configurateManager;
+    private Config config;
+    private Data data;
+    private BukkitAudiences platform;
+    private Messages messages;
 
     public void onEnable() {
 
@@ -50,21 +57,32 @@ public class MauveList extends JavaPlugin {
         }
 
         // Configuration Section
-        configManager = new ConfigManager(this);
-        configManager.loadConfigFiles(
-                new ConfigManager.ConfigPath(
-                        "config.yml",
-                        "config.yml",
-                        "config.yml"),
-                new ConfigManager.ConfigPath(
-                        "data.yml",
-                        "data.yml",
-                        "data.yml"));
-        configManager.saveAllConfigs(false);
+        configurateManager = new ConfigurateManager();
 
+        configurateManager.add("config.conf", TypeToken.get(Config.class), new Config(), Config::new);
+        configurateManager.add("data.conf", TypeToken.get(Data.class), new Data(), Data::new);
+
+        configurateManager.saveDefaults("config.conf");
+        configurateManager.saveDefaults("data.conf");
+
+        configurateManager.load("config.conf");
+        configurateManager.load("data.conf");
+
+        configurateManager.save("config.conf");
+        configurateManager.save("data.conf");
+
+        config = configurateManager.get("config.conf");
+        data = configurateManager.get("data.conf");
+        
         // Load Player Manager
         playerManager = new PlayerManager();
         playerManager.loadPlayerData();
+
+        // Register Audience (Messages)
+        platform = BukkitAudiences.create(this);
+
+        // Create Messages
+        messages = new Messages();
 
         // Register ACF
         paperCommandManager = new PaperCommandManager(this);
@@ -95,8 +113,24 @@ public class MauveList extends JavaPlugin {
         return playerManager;
     }
 
-    public ConfigManager getConfigManager() {
-        return configManager;
+    public ConfigurateManager getConfigurateManager() {
+        return configurateManager;
+    }
+
+    public Config getConfigML() {
+        return config;
+    }
+
+    public Data getData() {
+        return data;
+    }
+
+    public BukkitAudiences getPlatform() {
+        return platform;
+    }
+
+    public Messages getMessages() {
+        return messages;
     }
 
     public static Permission getPermission() {

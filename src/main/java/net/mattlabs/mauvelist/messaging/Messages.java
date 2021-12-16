@@ -1,103 +1,70 @@
 package net.mattlabs.mauvelist.messaging;
 
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 
-import static net.md_5.bungee.api.ChatColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.TextDecoration.BOLD;
 
 public class Messages {
 
-    private Messages() {
-
+    public Component version() {
+        return Component.text()
+                .append(Component.text("[", GRAY))
+                .append(Component.text("MauveList", TextColor.fromHexString("#5B4253")))
+                .append(Component.text("] ", GRAY))
+                .append(Component.text("Version: " + Bukkit.getPluginManager().getPlugin("MauveList").getDescription().getVersion(), WHITE))
+                .build();
     }
 
-    public static BaseComponent[] version() {
-        // [MauveList] Version: *version*
-        return new ComponentBuilder("[")
-                    .color(GRAY)
-                .append("MauveList")
-                    .color(DARK_PURPLE)
-                .append("] ")
-                    .color(GRAY)
-                .append("Version: " + Bukkit.getPluginManager().getPlugin("MauveList").getDescription().getVersion())
-                    .color(WHITE)
-                .create();
+    public Component lastTenGuestsHeading() {
+        return Component.text()
+                .append(Component.text("[", GRAY))
+                .append(Component.text("MauveList", TextColor.fromHexString("#5B4253")))
+                .append(Component.text("] ", GRAY))
+                .append(Component.text("Last 10 guests:", WHITE))
+                .build();
     }
 
-    public static BaseComponent[] lastTenMembersHeading() {
-        // [MauveList] Last 10 nonmembers:
-        return new ComponentBuilder("[")
-                    .color(GRAY)
-                .append("MauveList")
-                    .color(DARK_PURPLE)
-                .append("] ")
-                    .color(GRAY)
-                .append("Last 10 nonmembers:")
-                    .color(WHITE)
-                .create();
+    public Component lastTenGuestsListing(String name, String uuid, String lastJoin) {
+        return Component.text()
+                .append(Component.text(" - ", TextColor.fromHexString("#E0B0FF")))
+                .append(Component.text(name + " ", WHITE, BOLD)
+                        .hoverEvent(HoverEvent.showText(Component.text().append(Component.text("Last seen: " + lastJoin + "\n" + uuid)))))
+                .append(Component.text("[Accept]", BLUE, BOLD)
+                        .hoverEvent(HoverEvent.showText(Component.text("Click here to add " + name + " as a member.")))
+                        .clickEvent(ClickEvent.runCommand("/ml add " + name)))
+                .build();
     }
 
-    public static BaseComponent[] lastTenMembersListing(String name, String uuid, String lastJoin) {
-        //  - %name% <hover UUID> [Accept]
-        return new ComponentBuilder(" - ")
-                    .color(DARK_PURPLE)
-                .append(name + " ")
-                    .color(WHITE)
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new ComponentBuilder("Last seen: " + lastJoin +
-                                    "\n" + uuid)
-                                    .create()))
-                .append("[Accept]")
-                    .color(BLUE)
-                    .bold(true)
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                            new ComponentBuilder("Click here to add " + name + " as a member.").create()))
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/ml add " + name))
-                .create();
+    public Component nowAMember(String name) {
+        return Component.text()
+                .append(Component.text("[", GRAY))
+                .append(Component.text("MauveList", TextColor.fromHexString("#5B4253")))
+                .append(Component.text("] ", GRAY))
+                .append(Component.text(name, WHITE, BOLD))
+                .append(Component.text(" is now a member!"))
+                .build();
     }
 
-    public static BaseComponent[] nowAMember(String name) {
-        // [MauveList] %name% is now a member!
-        return new ComponentBuilder("[")
-                    .color(GRAY)
-                .append("MauveList")
-                    .color(DARK_PURPLE)
-                .append("] ")
-                    .color(GRAY)
-                .append(name)
-                    .color(WHITE)
-                    .bold(true)
-                .append(" is now a member!")
-                    .reset()
-                .create();
+    public Component couldNotAdd() {
+        return Component.text()
+                .append(Component.text("[", GRAY))
+                .append(Component.text("MauveList", TextColor.fromHexString("#5B4253")))
+                .append(Component.text(" ]", GRAY))
+                .append(Component.text("Could not add member, check member-group in config!", WHITE))
+                .build();
     }
 
-    public static BaseComponent[] couldNotAdd() {
-        // [MauveList] Could not add member, check member-group in config!!
-        return new ComponentBuilder("[")
-                    .color(GRAY)
-                .append("MauveList")
-                    .color(DARK_PURPLE)
-                .append("] ")
-                    .color(GRAY)
-                .append("Could not add member, check member-group in config!")
-                    .color(WHITE)
-                .create();
-    }
-
-    public static BaseComponent[] reloaded() {
-        // [MauveList] Configuration reloaded.
-        return new ComponentBuilder("[")
-                    .color(GRAY)
-                .append("MauveList")
-                    .color(DARK_PURPLE)
-                .append("] ")
-                    .color(GRAY)
-                .append("Configuration reloaded.")
-                    .color(WHITE)
-                .create();
+    public Component reloaded() {
+        return Component.text()
+                .append(Component.text("[", GRAY))
+                .append(Component.text("MauveList", TextColor.fromHexString("#5B4253")))
+                .append(Component.text(" ]", GRAY))
+                .append(Component.text("Configuration reloaded.", WHITE))
+                .build();
     }
 }

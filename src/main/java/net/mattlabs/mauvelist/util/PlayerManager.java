@@ -1,6 +1,5 @@
 package net.mattlabs.mauvelist.util;
 
-import net.mattlabs.configmanager.ConfigManager;
 import net.mattlabs.mauvelist.MauveList;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -14,13 +13,9 @@ import java.util.UUID;
 
 public class PlayerManager implements Runnable{
 
-    private ConfigManager configManager;
+    private MauveList mauveList = MauveList.getInstance();
     private LinkedList<UUID> nonMemberUUID;
     private LinkedList<String> nonMemberName, nonMemberDate;
-
-    public PlayerManager() {
-        configManager = MauveList.getInstance().getConfigManager();
-    }
 
     public void addPlayer(Player player) {
         nonMemberName.remove(player.getName());
@@ -44,7 +39,7 @@ public class PlayerManager implements Runnable{
         nonMemberUUID = new LinkedList<>();
         nonMemberName = new LinkedList<>();
         nonMemberDate = new LinkedList<>();
-        ArrayList<String> loadList = (ArrayList<String>) configManager.getFileConfig("data.yml").getStringList("nonMemberList");
+        ArrayList<String> loadList = mauveList.getData().getNonMemberList();
         for (String string : loadList) {
             String[] parts = string.split("\\|");
             nonMemberUUID.add(UUID.fromString(parts[0]));
@@ -69,9 +64,10 @@ public class PlayerManager implements Runnable{
     @Override
     public void run() {
         ArrayList<String> saveList = new ArrayList<>();
+        ArrayList<String> actualList = mauveList.getData().getNonMemberList();
         for (int i = 0; i < nonMemberName.size(); i++) saveList.add(nonMemberUUID.get(i) + "|" + nonMemberName.get(i) + "|" + nonMemberDate.get(i));
 
-        configManager.getFileConfig("data.yml").set("nonMemberList", saveList);
-        configManager.saveConfig("data.yml");
+        actualList = saveList;
+        mauveList.getConfigurateManager().save("data.conf");
     }
 }

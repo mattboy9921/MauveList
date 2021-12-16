@@ -53,6 +53,16 @@
             <id>configmanager-repo</id>
             <url>http://repo.mattlabs.net/repository/maven-public/</url>
         </repository>
+        <!-- For Configurate -->
+        <repository>
+            <id>sponge</id>
+            <url>https://repo.spongepowered.org/maven</url>
+        </repository>
+        <!-- For Adventure -->
+        <repository> <!-- for development builds -->
+            <id>sonatype-oss</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -60,7 +70,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <version>1.18-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- For ACF -->
@@ -81,6 +91,28 @@
             <groupId>net.mattlabs.configmanager</groupId>
             <artifactId>ConfigManager</artifactId>
             <version>1.1.0</version>
+        </dependency>
+        <!-- For Configurate -->
+        <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-hocon</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+        <!-- For Adventure -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.9.3</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-platform-bukkit</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -157,6 +189,11 @@
                             <pattern>net.mattlabs.configmanager</pattern>
                             <shadedPattern>net.mattlabs.mauvelist.configmanager</shadedPattern>
                         </relocation>
+                        <!-- Adventure -->
+                        <relocation>
+                            <pattern>net.kyori</pattern>
+                            <shadedPattern>net.mattlabs.crewchat</shadedPattern>
+                        </relocation>
                     </relocations>
                     <!-- Fix signed dependency JARs -->
                     <filters>
@@ -166,6 +203,7 @@
                                 <exclude>META-INF/*.RSA</exclude>
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.MF</exclude>
+                                <exclude>META-INF/versions/16/</exclude>
                             </excludes>
                         </filter>
                     </filters>
