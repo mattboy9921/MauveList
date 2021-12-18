@@ -2,12 +2,16 @@ package net.mattlabs.mauvelist;
 
 import co.aikar.commands.PaperCommandManager;
 import io.leangen.geantyref.TypeToken;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.mattlabs.mauvelist.commands.MauveListCommand;
+import net.mattlabs.mauvelist.listeners.JDAListener;
 import net.mattlabs.mauvelist.listeners.JoinListener;
 import net.mattlabs.mauvelist.listeners.KickListener;
 import net.mattlabs.mauvelist.listeners.QuitListener;
 import net.mattlabs.mauvelist.messaging.Messages;
+import net.mattlabs.mauvelist.util.ApplicationManager;
 import net.mattlabs.mauvelist.util.ConfigurateManager;
 import net.mattlabs.mauvelist.util.PlayerManager;
 import net.milkbowl.vault.permission.Permission;
@@ -16,6 +20,7 @@ import org.bukkit.World;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
@@ -33,6 +38,8 @@ public class MauveList extends JavaPlugin {
     private Data data;
     private BukkitAudiences platform;
     private Messages messages;
+    private JDA jda;
+    private ApplicationManager applicationManager;
 
     public void onEnable() {
 
@@ -84,6 +91,17 @@ public class MauveList extends JavaPlugin {
         // Create Messages
         messages = new Messages();
 
+        // Set Up JDA
+        try {
+            jda = JDABuilder.createDefault(config.getBotToken()).build();
+        } catch (LoginException e) {
+            e.printStackTrace();
+            this.setEnabled(false);
+        }
+
+        // Create ApplicationManager
+        applicationManager = new ApplicationManager();
+
         // Register ACF
         paperCommandManager = new PaperCommandManager(this);
 
@@ -91,6 +109,9 @@ public class MauveList extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
         getServer().getPluginManager().registerEvents(new KickListener(), this);
+
+        // Register JDA Listener
+        jda.addEventListener(new JDAListener());
 
         // Register commands with ACF
         paperCommandManager.registerCommand(new MauveListCommand());
@@ -103,6 +124,13 @@ public class MauveList extends JavaPlugin {
 
     public void onDisable() {
 
+    }
+
+    public void reload() {
+        getLogger().info("Reloading CrewChat...");
+        configurateManager.reload();
+        config = configurateManager.get("config.conf");
+        getLogger().info("Configuration reloaded.");
     }
 
     public static MauveList getInstance() {
@@ -131,6 +159,14 @@ public class MauveList extends JavaPlugin {
 
     public Messages getMessages() {
         return messages;
+    }
+
+    public JDA getJda() {
+        return jda;
+    }
+
+    public ApplicationManager getApplicationManager() {
+        return applicationManager;
     }
 
     public static Permission getPermission() {

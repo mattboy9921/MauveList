@@ -2,6 +2,10 @@ package net.mattlabs.mauvelist.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.util.PlayerManager;
 import net.milkbowl.vault.permission.Permission;
@@ -26,9 +30,8 @@ public class MauveListCommand extends BaseCommand {
     @Subcommand("reload")
     @Description("Reloads configuration.")
     public void onReload(CommandSender commandSender) {
-        mauveList.getConfigurateManager().reload();
+        mauveList.reload();
         if (commandSender instanceof Player) mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().reloaded());
-        MauveList.getInstance().getLogger().info("Configuration reloaded.");
     }
 
     @Subcommand("list")
@@ -67,5 +70,18 @@ public class MauveListCommand extends BaseCommand {
                 });
             }
         });
+    }
+
+    @Subcommand("applymessage|am")
+    @Description("Sends the application message to the relavent channel.")
+    public void onApplyButton() {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
+                .setDescription(mauveList.getConfigML().getApplyBody())
+                .setColor(2664261)
+                .build());
+        builder.setActionRows(ActionRow.of(Button.success("apply", "Apply")));
+        mauveList.getJda().getTextChannelById(mauveList.getConfigML().getApplyChannel()).sendMessage(builder.build()).queue();
+        mauveList.getLogger().info("Apply message has been sent.");
     }
 }

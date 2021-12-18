@@ -63,6 +63,17 @@
             <id>sonatype-oss</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
+        <!-- For DiscordSRV -->
+        <repository>
+            <id>Scarsz-Nexus</id>
+            <url>https://nexus.scarsz.me/content/groups/public/</url>
+        </repository>
+        <!-- For JDA -->
+        <repository>
+            <id>dv8tion</id>
+            <name>m2-dv8tion</name>
+            <url>https://m2.dv8tion.net/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -113,6 +124,12 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
             <version>4.1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- For JDA -->
+        <dependency>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>5.0.0-alpha.2</version>
         </dependency>
     </dependencies>
 
@@ -194,6 +211,16 @@
                             <pattern>net.kyori</pattern>
                             <shadedPattern>net.mattlabs.crewchat</shadedPattern>
                         </relocation>
+                        <!-- DiscordSRV -->
+                        <relocation>
+                            <pattern>com.discordsrv</pattern>
+                            <shadedPattern>net.mattlabs.discordsrv</shadedPattern>
+                        </relocation>
+                        <!-- For JDA -->
+                        <relocation>
+                            <pattern>net.dv8tion</pattern>
+                            <shadedPattern>net.mattlabs.dv8tion</shadedPattern>
+                        </relocation>
                     </relocations>
                     <!-- Fix signed dependency JARs -->
                     <filters>
@@ -207,6 +234,12 @@
                             </excludes>
                         </filter>
                     </filters>
+                    <transformers>
+                        <!-- For JDA -->
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <mainClass>net.mattlabs.mauvelist.MauveList</mainClass>
+                        </transformer>
+                    </transformers>
                 </configuration>
 
                 <!-- Perform shading for package phase -->

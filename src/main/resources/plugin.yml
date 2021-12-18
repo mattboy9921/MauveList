@@ -4,7 +4,11 @@ api-version: 1.13
 description: ${project.description}
 author: mattboy9921 (mattboy9921@aim.com)
 main: net.mattlabs.mauvelist.MauveList
-softdepend: [Vault]
+softdepend:
+  - Vault
+  - DiscordSRV
+loadbefore:
+  - DiscordSRV
 permissions:
   mauvelist.grey:
     description: Makes user part of the greylist and deletes their player data on quit.
