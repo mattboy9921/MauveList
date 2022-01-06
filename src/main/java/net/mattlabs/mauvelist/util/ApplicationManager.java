@@ -57,7 +57,7 @@ public class ApplicationManager {
         Bukkit.getScheduler().runTask(mauveList, () -> {
             Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ml add " + applications.get(user).answers.get(0));
             Bukkit.getScheduler().runTaskAsynchronously(mauveList, () -> {
-                jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationSuccess(user)).queue();
+                jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationSuccess(user, acceptor)).queue();
                 user.openPrivateChannel().complete().sendMessage(buildAccepted(user)).queue();
                 applications.remove(user);
             });
@@ -65,9 +65,9 @@ public class ApplicationManager {
 
     }
 
-    public void reject(User user, Message message) {
+    public void reject(User user, Message message, User rejector) {
         message.editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
-        jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationRejected(user)).queue();
+        jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationRejected(user, rejector)).queue();
         applications.remove(user);
     }
 
@@ -123,10 +123,12 @@ public class ApplicationManager {
         return builder.build();
     }
 
-    private Message buildApplicationSuccess(User user) {
+    private Message buildApplicationSuccess(User user, User acceptor) {
+        long epoch = System.currentTimeMillis() / 1000;
         MessageBuilder builder = new MessageBuilder();
         builder.setEmbeds(new EmbedBuilder().setTitle("Application accepted for " + user.getName())
-                .setDescription(applications.get(user).getAnswers().get(0) + " is now a member.")
+                .setDescription(applications.get(user).getAnswers().get(0) + " is now a member.\n\n" +
+                        "Accepted by " + acceptor.getAsMention() + " on <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*.")
                 .setColor(2664261)
                 .build());
         return builder.build();
@@ -141,10 +143,12 @@ public class ApplicationManager {
         return builder.build();
     }
 
-    private Message buildApplicationRejected(User user) {
+    private Message buildApplicationRejected(User user, User rejector) {
+        long epoch = System.currentTimeMillis() / 1000;
         MessageBuilder builder = new MessageBuilder();
         builder.setEmbeds(new EmbedBuilder().setTitle("Application rejected for " + user.getName())
-                .setDescription(applications.get(user).getAnswers().get(0) + " will not be added as a member, application discarded.")
+                .setDescription(applications.get(user).getAnswers().get(0) + " will not be added as a member, application discarded.\n\n" +
+                        "Rejected by " + rejector.getAsMention() + " on <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*.")
                 .setColor(14242639)
                 .build());
         return builder.build();
