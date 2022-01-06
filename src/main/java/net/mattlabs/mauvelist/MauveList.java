@@ -127,7 +127,7 @@ public class MauveList extends JavaPlugin {
     }
 
     public void reload() {
-        getLogger().info("Reloading CrewChat...");
+        getLogger().info("Reloading MauveList...");
         configurateManager.reload();
         config = configurateManager.get("config.conf");
         getLogger().info("Configuration reloaded.");
