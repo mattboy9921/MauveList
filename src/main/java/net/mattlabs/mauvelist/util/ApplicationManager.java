@@ -52,8 +52,8 @@ public class ApplicationManager {
         }
     }
 
-    public void accept(User user, Message message) {
-        message.editMessage(buildApplication(user)).setActionRows(ActionRow.of(Button.success("disabled" + user.getId(), "Accepted").asDisabled(), Button.secondary("disabled", "Reject").asDisabled())).queue();
+    public void accept(User user, Message message, User acceptor) {
+        message.editMessageComponents(ActionRow.of(Button.success("disabled" + user.getId(), "Accepted").asDisabled(), Button.secondary("disabled", "Reject").asDisabled())).queue();
         Bukkit.getScheduler().runTask(mauveList, () -> {
             Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ml add " + applications.get(user).answers.get(0));
             Bukkit.getScheduler().runTaskAsynchronously(mauveList, () -> {
@@ -66,7 +66,7 @@ public class ApplicationManager {
     }
 
     public void reject(User user, Message message) {
-        message.editMessage(buildApplication(user)).setActionRows(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
+        message.editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
         jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationRejected(user)).queue();
         applications.remove(user);
     }
