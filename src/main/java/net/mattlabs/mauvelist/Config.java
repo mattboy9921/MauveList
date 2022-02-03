@@ -112,4 +112,11 @@ public class Config {
     public String getAccepted() {
         return accepted;
     }
+
+    @Comment("\nThe message sent to rejected users")
+    private String rejected = "Thank you for your interest in the server. Unfortunately, your application has been rejected.";
+
+    public String getRejected() {
+        return rejected;
+    }
 }

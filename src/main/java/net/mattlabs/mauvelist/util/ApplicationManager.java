@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ApplicationManager {
 
@@ -58,17 +59,39 @@ public class ApplicationManager {
             Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ml add " + applications.get(user).answers.get(0));
             Bukkit.getScheduler().runTaskAsynchronously(mauveList, () -> {
                 jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationSuccess(user, acceptor)).queue();
-                user.openPrivateChannel().complete().sendMessage(buildAccepted(user)).queue();
+                user.openPrivateChannel().complete().sendMessage(buildAccepted()).queue();
                 applications.remove(user);
             });
         });
 
     }
 
-    public void reject(User user, Message message, User rejector) {
+    public void rejectStart(User user, Message message, User rejector) {
         message.editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
-        jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationRejected(user, rejector)).queue();
-        applications.remove(user);
+        applications.get(user).setWaitingForReason(true);
+        applications.get(user).setRejector(rejector);
+        rejector.openPrivateChannel().complete().sendMessage(buildRejectReason(rejector)).queue();
+    }
+
+    public void rejectConfirm(User rejector, String reason) {
+        User user = null;
+        for (Entry<User, Application> entry : applications.entrySet())
+            if (entry.getValue().isWaitingForReason())
+                if (entry.getValue().getRejector().equals(rejector))
+                    user = entry.getKey();
+        rejectConfirm(user, rejector, reason);
+    }
+
+    public void rejectConfirm(User user, User rejector, String reason) {
+        try {
+            jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationRejected(user, rejector, reason)).queue();
+            user.openPrivateChannel().complete().sendMessage(buildRejected(reason)).queue();
+            applications.remove(user);
+        }
+        catch (NullPointerException e) {
+            e.printStackTrace();
+            jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplicationFailed(e.getMessage())).queue();
+        }
     }
 
     private Message buildIntro() {
@@ -134,27 +157,37 @@ public class ApplicationManager {
         return builder.build();
     }
 
-    private Message buildApplicationFailed(User user, String reason) {
+    private Message buildApplicationFailed(String reason) {
         MessageBuilder builder = new MessageBuilder();
-        builder.setEmbeds(new EmbedBuilder().setTitle("Application failed for " + user.getName())
-                .setDescription("Reason: " + reason)
+        builder.setEmbeds(new EmbedBuilder().setTitle("Application failed")
+                .setDescription("Reason:\n" + reason)
                 .setColor(14242639)
                 .build());
         return builder.build();
     }
 
-    private Message buildApplicationRejected(User user, User rejector) {
+    private Message buildRejectReason(User user) {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle("What is the reason for rejecting " + user.getName() + "?")
+                .setColor(14242639)
+                .build());
+        builder.setActionRows(ActionRow.of(Button.secondary("rejectNoReason:" + user.getId(), "No Reason")));
+        return builder.build();
+    }
+
+    private Message buildApplicationRejected(User user, User rejector, String reason) {
         long epoch = System.currentTimeMillis() / 1000;
         MessageBuilder builder = new MessageBuilder();
         builder.setEmbeds(new EmbedBuilder().setTitle("Application rejected for " + user.getName())
                 .setDescription(applications.get(user).getAnswers().get(0) + " will not be added as a member, application discarded.\n\n" +
+                        "Reason: " + reason + "\n\n" +
                         "Rejected by " + rejector.getAsMention() + " on <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*.")
                 .setColor(14242639)
                 .build());
         return builder.build();
     }
 
-    private Message buildAccepted(User user) {
+    private Message buildAccepted() {
         MessageBuilder builder = new MessageBuilder();
         builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
                 .setDescription(mauveList.getConfigML().getAccepted())
@@ -163,14 +196,37 @@ public class ApplicationManager {
         return builder.build();
     }
 
+    private Message buildRejected(String reason) {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
+                .setDescription(mauveList.getConfigML().getRejected() +
+                        "\n\nReason: " + reason)
+                .setColor(14242639)
+                .build());
+        return builder.build();
+    }
+
     public boolean hasApplication(User user) {
         return applications.containsKey(user);
     }
+
+    public boolean hasApplicationRejection(User user) {
+        boolean appRejection = false;
+        for (Application application : applications.values())
+            if (application.isWaitingForReason())
+                if (application.getRejector().equals(user))
+                    appRejection = true;
+        return appRejection;
+    }
+
+
 
     private static class Application {
 
         private int step = -1;
         private ArrayList<String> answers = new ArrayList<>();
+        private boolean waitingForReason = false;
+        private User rejector = null;
 
         public int getStep() {
             return step;
@@ -182,6 +238,22 @@ public class ApplicationManager {
 
         public ArrayList<String> getAnswers() {
             return answers;
+        }
+
+        public boolean isWaitingForReason() {
+            return waitingForReason;
+        }
+
+        public void setWaitingForReason(boolean waitingForReason) {
+            this.waitingForReason = waitingForReason;
+        }
+
+        public User getRejector() {
+            return rejector;
+        }
+
+        public void setRejector(User rejector) {
+            this.rejector = rejector;
         }
     }
 }

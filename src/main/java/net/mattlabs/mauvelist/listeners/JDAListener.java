@@ -30,7 +30,12 @@ public class JDAListener extends ListenerAdapter {
         else if (event.getButton().getId().contains("applicationReject")) {
             event.deferEdit().queue();
             String[] parts = event.getButton().getId().split(":");
-            applicationManager.reject(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getMessage(), event.getUser());
+            applicationManager.rejectStart(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getMessage(), event.getUser());
+        }
+        else if (event.getButton().getId().contains("rejectNoReason")) {
+            event.deferEdit().queue();
+            String[] parts = event.getButton().getId().split(":");
+            applicationManager.rejectConfirm(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getUser(), "No reason provided.");
         }
     }
 
@@ -39,6 +44,9 @@ public class JDAListener extends ListenerAdapter {
         if (event.isFromType(ChannelType.PRIVATE)) {
             if (applicationManager.hasApplication(event.getAuthor())) {
                 applicationManager.update(event.getAuthor(), event.getMessage().getContentDisplay());
+            }
+            else if (applicationManager.hasApplicationRejection(event.getAuthor())) {
+                applicationManager.rejectConfirm(event.getAuthor(), event.getMessage().getContentDisplay());
             }
         }
     }
