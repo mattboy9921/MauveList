@@ -132,7 +132,8 @@ public class ApplicationManager {
 
         ArrayList<String> questions = mauveList.getConfigML().getQuestions();
         ArrayList<String> answers = applications.get(user).getAnswers();
-        for (int i = 0; i < questions.size(); i++)
+        description = description.concat("*" + questions.get(0) + "*\n`" + answers.get(0) + "`\n\n");
+        for (int i = 1; i < questions.size(); i++)
             description = description.concat("*" + questions.get(i) + "*\n" + answers.get(i) + "\n\n");
 
         description = description.concat("Please click **Accept** or **Reject** below.");

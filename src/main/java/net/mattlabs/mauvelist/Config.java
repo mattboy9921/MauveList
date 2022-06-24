@@ -95,7 +95,7 @@ public class Config {
 
     public ArrayList<String> getQuestions() {
         ArrayList<String> allQuestions = new ArrayList<>(questions);
-        allQuestions.add(0, "What is your Minecraft username?");
+        allQuestions.add(0, "What is your Minecraft username? Please type out only your username exactly as it shows in game, this is used to set you up in game.");
         return allQuestions;
     }
 
