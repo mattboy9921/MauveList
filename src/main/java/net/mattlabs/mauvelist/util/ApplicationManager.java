@@ -10,6 +10,9 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import net.mattlabs.mauvelist.MauveList;
 import org.bukkit.Bukkit;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,8 +40,18 @@ public class ApplicationManager {
 
     public void update(User user, String answer) {
         if (applications.containsKey(user)) {
-            applications.get(user).getAnswers().add(answer);
-            applications.get(user).incrementStep();
+            if (applications.get(user).getStep() == 0) {
+                String minecraftUsername = getMinecraftUsernameFromString(removePunctuation(answer));
+                if (minecraftUsernameIsValid(minecraftUsername)) {
+                    applications.get(user).getAnswers().add(minecraftUsername);
+                    applications.get(user).incrementStep();
+                } else {
+                    user.openPrivateChannel().complete().sendMessage("The minecraft username you have provided is invalid and/or does not exist. \n Please type out only your username exactly as it shows in game.").queue();
+                }
+            } else {
+                applications.get(user).getAnswers().add(answer);
+                applications.get(user).incrementStep();
+            }
             // Send user next step of application
             if (applications.get(user).getStep() < mauveList.getConfigML().getQuestions().size())
                 user.openPrivateChannel().complete().sendMessage(buildQuestion(applications.get(user).getStep())).queue();
@@ -205,6 +218,41 @@ public class ApplicationManager {
                 .setColor(14242639)
                 .build());
         return builder.build();
+    }
+
+    private String removePunctuation(String string) {
+        return string.replaceAll("[\\p{Punct}&&[^_]]+", "");
+    }
+
+    private String getMinecraftUsernameFromString(String usernameString) {
+        String[] usernameArray = usernameString.split(" ");
+        return usernameArray[usernameArray.length - 1];
+    }
+
+    private boolean minecraftUsernameIsValid(String username) {
+        return username.length() >= 3 && username.length() <= 16 && validateMinecraftUsernameWithAPI(username);
+    }
+
+    private boolean validateMinecraftUsernameWithAPI(String username){
+        String urlString = "https://api.mojang.com/users/profiles/minecraft/" + username;
+        try {
+            URL url = new URL(urlString);
+
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(500);
+            connection.setReadTimeout(500);
+
+            int statusCode = connection.getResponseCode();
+
+            if (statusCode == 200) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public boolean hasApplication(User user) {
