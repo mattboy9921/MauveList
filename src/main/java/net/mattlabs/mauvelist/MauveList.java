@@ -4,6 +4,7 @@ import co.aikar.commands.PaperCommandManager;
 import io.leangen.geantyref.TypeToken;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.mattlabs.mauvelist.commands.MauveListCommand;
 import net.mattlabs.mauvelist.listeners.JDAListener;
@@ -93,7 +94,7 @@ public class MauveList extends JavaPlugin {
 
         // Set Up JDA
         try {
-            jda = JDABuilder.createDefault(config.getBotToken()).build();
+            jda = JDABuilder.createDefault(config.getBotToken()).setStatus(getOnlineStatusFromString(config.getBotStatus())).build();
         } catch (LoginException e) {
             e.printStackTrace();
             this.setEnabled(false);
@@ -194,5 +195,18 @@ public class MauveList extends JavaPlugin {
             return permission != null;
         }
         else return false;
+    }
+
+    private OnlineStatus getOnlineStatusFromString(String status) {
+        switch(status) {
+            case "invisible":
+                return OnlineStatus.INVISIBLE;
+            case "dnd":
+                return OnlineStatus.DO_NOT_DISTURB;
+            case "away":
+                return OnlineStatus.IDLE;
+            default:
+                return OnlineStatus.ONLINE;
+        }
     }
 }
