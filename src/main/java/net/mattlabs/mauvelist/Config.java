@@ -83,6 +83,11 @@ public class Config {
         return botToken;
     }
 
+    @Comment("\nSet the bot's default online status (online, dnd, away, invisible)")
+    private String botStatus = "online";
+
+    public String getBotStatus() { return botStatus; }
+
     @Comment("\nThe introduction message the bot sends to the applicant")
     private String applicationIntroduction = "Hi there, thank you for showing interest in our server. Please click the button below to start the application process.";
 
