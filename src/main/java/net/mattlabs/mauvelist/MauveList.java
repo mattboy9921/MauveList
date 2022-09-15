@@ -93,11 +93,16 @@ public class MauveList extends JavaPlugin {
         messages = new Messages();
 
         // Set Up JDA
-        try {
-            jda = JDABuilder.createDefault(config.getBotToken()).setStatus(getOnlineStatusFromString(config.getBotStatus())).build();
-        } catch (LoginException e) {
-            e.printStackTrace();
-            this.setEnabled(false);
+        if (getConfigML().isEnableDiscord()) {
+            try {
+                jda = JDABuilder.createDefault(config.getBotToken()).setStatus(getOnlineStatusFromString(config.getBotStatus())).build();
+            } catch (LoginException e) {
+                e.printStackTrace();
+                this.setEnabled(false);
+            }
+
+            // Register JDA Listener
+            jda.addEventListener(new JDAListener());
         }
 
         // Create ApplicationManager
@@ -110,9 +115,6 @@ public class MauveList extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
         getServer().getPluginManager().registerEvents(new KickListener(), this);
-
-        // Register JDA Listener
-        jda.addEventListener(new JDAListener());
 
         // Register commands with ACF
         paperCommandManager.registerCommand(new MauveListCommand());

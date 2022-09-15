@@ -75,13 +75,17 @@ public class MauveListCommand extends BaseCommand {
     @Subcommand("applymessage|am")
     @Description("Sends the application message to the relavent channel.")
     public void onApplyButton() {
-        MessageBuilder builder = new MessageBuilder();
-        builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
-                .setDescription(mauveList.getConfigML().getApplyBody())
-                .setColor(2664261)
-                .build());
-        builder.setActionRows(ActionRow.of(Button.success("apply", "Apply")));
-        mauveList.getJda().getTextChannelById(mauveList.getConfigML().getApplyChannel()).sendMessage(builder.build()).queue();
-        mauveList.getLogger().info("Apply message has been sent.");
+        if (mauveList.getConfigML().isEnableDiscord()) {
+            MessageBuilder builder = new MessageBuilder();
+            builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
+                    .setDescription(mauveList.getConfigML().getApplyBody())
+                    .setColor(2664261)
+                    .build());
+            builder.setActionRows(ActionRow.of(Button.success("apply", "Apply")));
+            mauveList.getJda().getTextChannelById(mauveList.getConfigML().getApplyChannel()).sendMessage(builder.build()).queue();
+            mauveList.getLogger().info("Apply message has been sent.");
+        }
+        else
+            mauveList.getServer().getLogger().warning("Discord support is disabled!");
     }
 }

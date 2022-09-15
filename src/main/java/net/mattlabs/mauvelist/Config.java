@@ -33,6 +33,13 @@ public class Config {
             "Config version. Do not change this!")
     private int schemaVersion = 0;
 
+    @Comment("\nEnable Discord support for the plugin")
+    private boolean enableDiscord = false;
+
+    public boolean isEnableDiscord() {
+        return enableDiscord;
+    }
+
     @Comment("\nThe group to set nonmembers to when added (the members group)\n")
     private String memberGroup = "mauve";
 
