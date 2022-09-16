@@ -40,6 +40,13 @@ public class Config {
         return enableDiscord;
     }
 
+    @Comment("\nEnable guest player data file deletion upon quit")
+    private boolean deletePlayerData = false;
+
+    public boolean isDeletePlayerData() {
+        return deletePlayerData;
+    }
+
     @Comment("\nThe group to set nonmembers to when added (the members group)\n")
     private String memberGroup = "mauve";
 

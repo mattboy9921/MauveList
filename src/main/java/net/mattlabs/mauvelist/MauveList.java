@@ -9,8 +9,7 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.mattlabs.mauvelist.commands.MauveListCommand;
 import net.mattlabs.mauvelist.listeners.JDAListener;
 import net.mattlabs.mauvelist.listeners.JoinListener;
-import net.mattlabs.mauvelist.listeners.KickListener;
-import net.mattlabs.mauvelist.listeners.QuitListener;
+import net.mattlabs.mauvelist.listeners.LeaveListener;
 import net.mattlabs.mauvelist.messaging.Messages;
 import net.mattlabs.mauvelist.util.ApplicationManager;
 import net.mattlabs.mauvelist.util.ConfigurateManager;
@@ -112,9 +111,8 @@ public class MauveList extends JavaPlugin {
         paperCommandManager = new PaperCommandManager(this);
 
         // Register listeners
-        getServer().getPluginManager().registerEvents(new QuitListener(), this);
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
-        getServer().getPluginManager().registerEvents(new KickListener(), this);
+        getServer().getPluginManager().registerEvents(new LeaveListener(), this);
 
         // Register commands with ACF
         paperCommandManager.registerCommand(new MauveListCommand());
