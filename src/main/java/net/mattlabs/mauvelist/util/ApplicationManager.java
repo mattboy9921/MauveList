@@ -20,15 +20,17 @@ import java.util.Map.Entry;
 
 public class ApplicationManager {
 
-    private MauveList mauveList = MauveList.getInstance();
-    private JDA jda = mauveList.getJda();
-    private Map<User, Application> applications = new HashMap<>();
+    private final MauveList mauveList = MauveList.getInstance();
+    private final JDA jda = mauveList.getJda();
+    private final Map<User, Application> applications = new HashMap<>();
 
+    // Add a new Discord user to the applications map
     public void add(User user) {
         applications.put(user, new Application());
         user.openPrivateChannel().complete().sendMessage(buildIntro()).queue();
     }
 
+    // Called when user clicks the "Start Application" button, starts the application process
     public void update(User user) {
         if (applications.containsKey(user)) {
             if (applications.get(user).getStep() == -1) {
@@ -38,8 +40,10 @@ public class ApplicationManager {
         }
     }
 
+    // Called when the user sends a response to the last question, sends next question
     public void update(User user, String answer) {
         if (applications.containsKey(user)) {
+            // Username validation
             if (applications.get(user).getStep() == 0) {
                 String minecraftUsername = getMinecraftUsernameFromString(removePunctuation(answer));
                 if (minecraftUsernameIsValid(minecraftUsername)) {
@@ -66,6 +70,7 @@ public class ApplicationManager {
         }
     }
 
+    // Called when a moderator clicks "Accept" on an application
     public void accept(User user, Message message, User acceptor) {
         message.editMessageComponents(ActionRow.of(Button.success("disabled" + user.getId(), "Accepted").asDisabled(), Button.secondary("disabled", "Reject").asDisabled())).queue();
         Bukkit.getScheduler().runTask(mauveList, () -> {
@@ -79,6 +84,7 @@ public class ApplicationManager {
 
     }
 
+    // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
     public void rejectStart(User user, Message message, User rejector) {
         message.editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
         applications.get(user).setWaitingForReason(true);
@@ -86,6 +92,7 @@ public class ApplicationManager {
         rejector.openPrivateChannel().complete().sendMessage(buildRejectReason(rejector)).queue();
     }
 
+    // Called when mod responds with reason or clicks no reason
     public void rejectConfirm(User rejector, String reason) {
         User user = null;
         for (Entry<User, Application> entry : applications.entrySet())
@@ -245,11 +252,7 @@ public class ApplicationManager {
 
             int statusCode = connection.getResponseCode();
 
-            if (statusCode == 200) {
-                return true;
-            } else {
-                return false;
-            }
+            return statusCode == 200;
         } catch (IOException e) {
             return false;
         }
