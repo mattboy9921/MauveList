@@ -48,9 +48,8 @@ public class ApplicationManager {
         if (applications.containsKey(user)) {
             // Username validation
             if (applications.get(user).getQuestionStep() == 0) {
-                String minecraftUsername = getMinecraftUsernameFromString(removePunctuation(answer));
-                if (minecraftUsernameIsValid(minecraftUsername)) {
-                    applications.get(user).getAnswers().add(minecraftUsername);
+                if (minecraftUsernameIsValid(answer)) {
+                    applications.get(user).getAnswers().add(answer);
                     applications.get(user).incrementQuestionStep();
                 } else {
                     user.openPrivateChannel().complete().sendMessage("The minecraft username you have provided is invalid and/or does not exist. \n Please type out only your username exactly as it shows in game.").queue();
@@ -243,7 +242,7 @@ public class ApplicationManager {
     }
 
     private boolean minecraftUsernameIsValid(String username) {
-        return username.length() >= 3 && username.length() <= 16 && validateMinecraftUsernameWithAPI(username);
+        return username.length() >= 3 && username.length() <= 16 && username.matches("\\w+") && validateMinecraftUsernameWithAPI(username);
     }
 
     private boolean validateMinecraftUsernameWithAPI(String username){
