@@ -1,15 +1,26 @@
 package net.mattlabs.mauvelist.messaging;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Button;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
+import net.mattlabs.mauvelist.MauveList;
 import org.bukkit.Bukkit;
+
+import java.util.ArrayList;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
 
 public class Messages {
+
+    private final MauveList mauveList = MauveList.getInstance();
 
     public Component version() {
         return Component.text()
@@ -66,5 +77,119 @@ public class Messages {
                 .append(Component.text(" ]", GRAY))
                 .append(Component.text("Configuration reloaded.", WHITE))
                 .build();
+    }
+
+    // Discord Messages
+
+    public Message applicationUserIntro() {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
+                .setDescription(mauveList.getConfigML().getApplicationIntroduction())
+                .setColor(2664261)
+                .build());
+        builder.setActionRows(ActionRow.of(Button.success("applicationStart", "Start Application"), Button.danger("cancel", "Cancel")));
+        return builder.build();
+    }
+
+    public Message applicationUserQuestion(String question) {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle(question)
+                .setColor(161240)
+                .build());
+        return builder.build();
+    }
+
+    public Message applicationUserComplete() {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
+                .setDescription(mauveList.getConfigML().getApplicationCompletion())
+                .setColor(2664261)
+                .build());
+        return builder.build();
+    }
+
+    public Message application(User user, ArrayList<String> answers) {
+        MessageBuilder builder = new MessageBuilder();
+
+        long epoch = System.currentTimeMillis() / 1000;
+        String description = "**@here, " + user.getName() + " has applied for the server. Here is their application:**\n\n" +
+                "Discord username: " + user.getAsMention() + "\n" +
+                "Time submitted: <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*\n\n" +
+                "**Question responses:**\n\n";
+
+        ArrayList<String> questions = mauveList.getConfigML().getQuestions();
+        description = description.concat("*" + questions.get(0) + "*\n`" + answers.get(0) + "`\n\n");
+        for (int i = 1; i < questions.size(); i++)
+            description = description.concat("*" + questions.get(i) + "*\n" + answers.get(i) + "\n\n");
+
+        description = description.concat("Please click **Accept** or **Reject** below.");
+
+        builder.setEmbeds(new EmbedBuilder().setTitle("Applicant: " + user.getName())
+                .setDescription(description)
+                .setColor(161240)
+                .build());
+
+        builder.setActionRows(ActionRow.of(Button.primary("applicationAccept:" + user.getId(), "Accept"), Button.secondary("applicationReject:" + user.getId(), "Reject")));
+        return builder.build();
+    }
+
+    public Message applicationAccepted(User user, String minecraftUsername, User acceptor) {
+        long epoch = System.currentTimeMillis() / 1000;
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle("Application accepted for " + user.getName())
+                .setDescription("`" + minecraftUsername + "` is now a member.\n\n" +
+                        "Accepted by " + acceptor.getAsMention() + " on <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*.")
+                .setColor(2664261)
+                .build());
+        return builder.build();
+    }
+
+    public Message applicationRejectReason(User user) {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle("What is the reason for rejecting " + user.getName() + "?")
+                .setColor(14242639)
+                .build());
+        builder.setActionRows(ActionRow.of(Button.secondary("rejectNoReason:" + user.getId(), "No Reason")));
+        return builder.build();
+    }
+
+    public Message applicationRejected(User user, String minecraftUsername, User rejector, String reason) {
+        long epoch = System.currentTimeMillis() / 1000;
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle("Application rejected for " + user.getName())
+                .setDescription("`" + minecraftUsername + "` will not be added as a member, application discarded.\n\n" +
+                        "Reason: " + reason + "\n\n" +
+                        "Rejected by " + rejector.getAsMention() + " on <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*.")
+                .setColor(14242639)
+                .build());
+        return builder.build();
+    }
+
+    public Message applicationUserAccepted() {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
+                .setDescription(mauveList.getConfigML().getAccepted())
+                .setColor(2664261)
+                .build());
+        return builder.build();
+    }
+
+    public Message applicationUserRejected(String reason) {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
+                .setDescription(mauveList.getConfigML().getRejected() +
+                        "\n\nReason: " + reason)
+                .setColor(14242639)
+                .build());
+        return builder.build();
+    }
+
+    public Message applicationFailed(String reason) {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle("Application failed")
+                .setDescription("Reason:\n" + reason)
+                .setColor(14242639)
+                .build());
+        return builder.build();
     }
 }
