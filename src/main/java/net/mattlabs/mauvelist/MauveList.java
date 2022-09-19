@@ -91,6 +91,9 @@ public class MauveList extends JavaPlugin {
         // Create Messages
         messages = new Messages();
 
+        // Create ApplicationManager
+        applicationManager = new ApplicationManager();
+
         // Set Up JDA
         if (getConfigML().isEnableDiscord()) {
             try {
@@ -103,9 +106,6 @@ public class MauveList extends JavaPlugin {
             // Register JDA Listener
             jda.addEventListener(new JDAListener());
         }
-
-        // Create ApplicationManager
-        applicationManager = new ApplicationManager();
 
         // Register ACF
         paperCommandManager = new PaperCommandManager(this);
