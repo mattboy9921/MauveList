@@ -25,17 +25,20 @@ public class ApplicationManager {
     private final Map<User, Application> applications = new HashMap<>();
 
     // Add a new Discord user to the applications map
-    public void add(User user) {
+    public void newApplication(User user) {
+        // Create new application
         applications.put(user, new Application());
+        // Message user to start application
         user.openPrivateChannel().complete().sendMessage(buildIntro()).queue();
     }
 
     // Called when user clicks the "Start Application" button, starts the application process
-    public void update(User user) {
+    public void startApplication(User user) {
         if (applications.containsKey(user)) {
-            if (applications.get(user).getStep() == -1) {
-                applications.get(user).incrementStep();
-                user.openPrivateChannel().complete().sendMessage(buildQuestion(applications.get(user).getStep())).queue();
+            if (applications.get(user).getState().equals(Application.State.NOT_STARTED)) {
+                applications.get(user).setState(Application.State.IN_PROGRESS);
+                // Send first question
+                user.openPrivateChannel().complete().sendMessage(buildQuestion(applications.get(user).getQuestionStep())).queue();
             }
         }
     }
@@ -44,21 +47,21 @@ public class ApplicationManager {
     public void update(User user, String answer) {
         if (applications.containsKey(user)) {
             // Username validation
-            if (applications.get(user).getStep() == 0) {
+            if (applications.get(user).getQuestionStep() == 0) {
                 String minecraftUsername = getMinecraftUsernameFromString(removePunctuation(answer));
                 if (minecraftUsernameIsValid(minecraftUsername)) {
                     applications.get(user).getAnswers().add(minecraftUsername);
-                    applications.get(user).incrementStep();
+                    applications.get(user).incrementQuestionStep();
                 } else {
                     user.openPrivateChannel().complete().sendMessage("The minecraft username you have provided is invalid and/or does not exist. \n Please type out only your username exactly as it shows in game.").queue();
                 }
             } else {
                 applications.get(user).getAnswers().add(answer);
-                applications.get(user).incrementStep();
+                applications.get(user).incrementQuestionStep();
             }
             // Send user next step of application
-            if (applications.get(user).getStep() < mauveList.getConfigML().getQuestions().size())
-                user.openPrivateChannel().complete().sendMessage(buildQuestion(applications.get(user).getStep())).queue();
+            if (applications.get(user).getQuestionStep() < mauveList.getConfigML().getQuestions().size())
+                user.openPrivateChannel().complete().sendMessage(buildQuestion(applications.get(user).getQuestionStep())).queue();
             // Post application
             else {
                 user.openPrivateChannel().complete().sendMessage(buildComplete()).queue();
@@ -66,6 +69,8 @@ public class ApplicationManager {
                 jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage("@here").queue(message -> message.delete().queue());
                 // Send application
                 jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(buildApplication(user)).queue();
+
+                applications.get(user).setState(Application.State.SUBMITTED);
             }
         }
     }
@@ -89,6 +94,7 @@ public class ApplicationManager {
         message.editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
         applications.get(user).setWaitingForReason(true);
         applications.get(user).setRejector(rejector);
+        applications.get(user).setState(Application.State.UNDER_REVIEW);
         rejector.openPrivateChannel().complete().sendMessage(buildRejectReason(rejector)).queue();
     }
 
@@ -275,17 +281,26 @@ public class ApplicationManager {
 
     private static class Application {
 
-        private int step = -1;
+        private State state = State.NOT_STARTED;
+        private int questionStep = 0;
         private ArrayList<String> answers = new ArrayList<>();
         private boolean waitingForReason = false;
         private User rejector = null;
 
-        public int getStep() {
-            return step;
+        public State getState() {
+            return state;
         }
 
-        public void incrementStep() {
-            step++;
+        public void setState(State state) {
+            this.state = state;
+        }
+
+        public int getQuestionStep() {
+            return questionStep;
+        }
+
+        public void incrementQuestionStep() {
+            questionStep++;
         }
 
         public ArrayList<String> getAnswers() {
@@ -306,6 +321,13 @@ public class ApplicationManager {
 
         public void setRejector(User rejector) {
             this.rejector = rejector;
+        }
+
+        public enum State {
+            NOT_STARTED,
+            IN_PROGRESS,
+            SUBMITTED,
+            UNDER_REVIEW
         }
     }
 }

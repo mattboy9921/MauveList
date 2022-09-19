@@ -16,11 +16,11 @@ public class JDAListener extends ListenerAdapter {
     public void onButtonClick(ButtonClickEvent event) {
         if (event.getButton().getId().equals("apply")) {
             event.deferEdit().queue();
-            applicationManager.add(event.getUser());
+            applicationManager.newApplication(event.getUser());
         }
         else if (event.getButton().getId().equals("applicationStart")) {
             event.deferEdit().queue();
-            applicationManager.update(event.getUser());
+            applicationManager.startApplication(event.getUser());
         }
         else if (event.getButton().getId().contains("applicationAccept")) {
             event.deferEdit().queue();
