@@ -76,7 +76,6 @@ public class ApplicationManager {
             else if (application.getState().equals(Application.State.SKIN)) {
                 // Correct skin
                 if (answer != null) {
-                    application.getAnswers().add(answer);
                     application.setState(Application.State.IN_PROGRESS);
                 }
                 // Incorrect skin
