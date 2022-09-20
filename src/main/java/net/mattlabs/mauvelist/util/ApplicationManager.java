@@ -10,6 +10,7 @@ import net.mattlabs.mauvelist.Config;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.messaging.Messages;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -31,7 +32,8 @@ public class ApplicationManager {
     // Add a new Discord user to the applications map
     public void create(User user) {
         // Create new application
-        applications.put(user, new Application());
+        applications.put(user, new Application(user));
+        applications.get(user).startTimeout();
         // Message user to start application
         user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue(
                 (message) -> applications.get(user).setIntroMessage(message));
@@ -42,6 +44,7 @@ public class ApplicationManager {
     }
 
     public void update(User user, String response) {
+        applications.get(user).restartTimeout();
         switch (applications.get(user).getState()) {
             case NOT_STARTED:
                 start(user);
@@ -151,7 +154,53 @@ public class ApplicationManager {
                     .sendMessage(messages.application(user, application.getAnswers()))
                     .queue((message) -> application.setApplicationMessage(message));
 
+            application.stopTimeout();
             application.setState(Application.State.SUBMITTED);
+        }
+    }
+
+    // Called when an application times out
+    private void timeout(User user) {
+        Application application = applications.get(user);
+
+        // Update messages
+        switch (application.getState()) {
+            case NOT_STARTED:
+                application.getIntroMessage().editMessageComponents(ActionRow.of(
+                        Button.success("applicationStart", "Start Application").asDisabled(),
+                        Button.danger("cancel", "Cancel").asDisabled())).queue();
+                break;
+            case SKIN:
+                application.getSkinMessage().editMessageComponents(ActionRow.of(
+                        Button.success("acceptSkin", "This is me").asDisabled(),
+                        Button.danger("rejectSkin", "This is not me").asDisabled())).queue();
+                break;
+            case UNDER_REVIEW:
+                application.getApplicationMessage().editMessageEmbeds().setEmbeds(
+                        new EmbedBuilder(application.getApplicationMessage().getEmbeds().get(0))
+                                .setFooter(null).build()).queue();
+                application.getApplicationMessage().editMessageComponents(ActionRow.of(
+                        Button.primary("applicationAccept:" + user.getId(), "Accept"),
+                        Button.secondary("applicationReject:" + user.getId(), "Reject"))).queue();
+                application.getReviewMessage().editMessageComponents(ActionRow.of(
+                        Button.secondary("rejectNoReason:" + user.getId(), "No Reason").asDisabled())).queue();
+                break;
+        }
+        // Application review
+        if (application.getState().equals(Application.State.UNDER_REVIEW)) {
+            // Inform rejector
+            String message = "Your application review has timed out due to inactivity. If you wish to review again, please visit the server applications channel.";
+            application.getRejector().openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
+
+            application.setState(Application.State.SUBMITTED);
+        }
+        // Application in progress
+        else {
+            // Inform user
+            String message = "Your application has timed out due to inactivity. If you wish to apply again, please visit the server apply channel and click apply.";
+            user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
+
+            applications.remove(user);
         }
     }
 
@@ -194,10 +243,11 @@ public class ApplicationManager {
         // Update application
         application.setWaitingForReason(true);
         application.setRejector(rejector);
+        application.startTimeout();
         application.setState(Application.State.UNDER_REVIEW);
 
         // Ask rejector for reason
-        rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(rejector)).queue();
+        rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(rejector)).queue(application::setReviewMessage);
     }
 
     // Called when mod responds with reason or clicks no reason
@@ -219,6 +269,7 @@ public class ApplicationManager {
         try {
             jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationRejected(user, application.getAnswers().get(0), rejector, reason)).queue();
             user.openPrivateChannel().complete().sendMessage(messages.applicationUserRejected(reason)).queue();
+            application.stopTimeout();
             applications.remove(user);
         }
         catch (NullPointerException e) {
@@ -262,11 +313,9 @@ public class ApplicationManager {
         return appRejection;
     }
 
-
-
     private static class Application {
-
         private State state = State.NOT_STARTED;
+        private User user = null;
         private String username = null;
         private int questionStep = 0;
         private ArrayList<String> answers = new ArrayList<>();
@@ -275,6 +324,12 @@ public class ApplicationManager {
         private Message introMessage = null;
         private Message skinMessage = null;
         private Message applicationMessage = null;
+        private Message reviewMessage = null;
+        private BukkitTask timeout = null;
+
+        Application(User user) {
+            this.user = user;
+        }
 
         public String getUsername() {
             return username;
@@ -346,6 +401,31 @@ public class ApplicationManager {
 
         public void setApplicationMessage(Message applicationMessage) {
             this.applicationMessage = applicationMessage;
+        }
+
+        public Message getReviewMessage() {
+            return reviewMessage;
+        }
+
+        public void setReviewMessage(Message reviewMessage) {
+            this.reviewMessage = reviewMessage;
+        }
+
+        public void startTimeout() {
+            timeout = Bukkit.getScheduler().runTaskLaterAsynchronously(MauveList.getInstance(), this::triggerTimeout, 600);
+        }
+
+        public void restartTimeout() {
+            stopTimeout();
+            startTimeout();
+        }
+
+        public void stopTimeout() {
+            timeout.cancel();
+        }
+
+        public void triggerTimeout() {
+            MauveList.getInstance().getApplicationManager().timeout(user);
         }
 
         public enum State {
