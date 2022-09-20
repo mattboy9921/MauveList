@@ -29,86 +29,111 @@ public class ApplicationManager {
     private final Map<User, Application> applications = new HashMap<>();
 
     // Add a new Discord user to the applications map
-    public void newApplication(User user) {
+    public void create(User user) {
         // Create new application
         applications.put(user, new Application());
         // Message user to start application
         user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue();
     }
 
-    // Called when user clicks the "Start Application" button, starts the application process
-    public void startApplication(User user) {
-        if (applications.containsKey(user)) {
-            if (applications.get(user).getState().equals(Application.State.NOT_STARTED)) {
-                applications.get(user).setState(Application.State.USERNAME);
-                // Send first question
-                String question = config.getQuestions().get(0);
-                user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
+    public void update(User user) {
+        update(user, null);
+    }
+
+    public void update(User user, String response) {
+        switch (applications.get(user).getState()) {
+            case NOT_STARTED:
+                start(user);
+                break;
+            case USERNAME:
+                username(user, response);
+                break;
+            case SKIN:
+                skin(user, user.getId().equals(response));
+                break;
+            case IN_PROGRESS:
+                question(user, response);
+                break;
+        }
+    }
+
+    // Sends first question
+    private void start(User user) {
+        if (applications.get(user).getState().equals(Application.State.NOT_STARTED)) {
+            applications.get(user).setState(Application.State.USERNAME);
+            // Send first question
+            String question = config.getQuestions().get(0);
+            user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
+        }
+    }
+
+    // Called for username validation
+    private void username(User user, String username) {
+        Application application = applications.get(user);
+
+        // Username validation
+        if (minecraftUsernameIsValid(username)) {
+            // Check if Minecraft username already in members group
+            if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(username), config.getMemberGroup())) {
+                user.openPrivateChannel().complete().sendMessage(messages.applicationUserAvatar(username)).queue();
+                application.setUsername(username);
+                application.setState(Application.State.SKIN);
             }
+            else {
+                String message = "This Minecraft username is already a member on this server. If you believe this is an error, contact a moderator.";
+                user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
+            }
+        }
+        else {
+            String message = "The minecraft username you have provided is invalid and/or does not exist. Please type out only your username exactly as it shows in game.";
+            user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
+        }
+    }
+
+    // Called when the user clicks a button for the skin confirmation
+    private void skin(User user, boolean confirmation) {
+        Application application = applications.get(user);
+
+        // Correct skin
+        if (confirmation) {
+            // Update application
+            application.getAnswers().add(application.getUsername());
+            application.setState(Application.State.IN_PROGRESS);
+            application.incrementQuestionStep();
+            // Send next question
+            String question = config.getQuestions().get(application.getQuestionStep());
+            user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
+        }
+        // Incorrect skin
+        else {
+            application.setState(Application.State.USERNAME);
+            // Ask for username again
+            String question = config.getQuestions().get(0);
+            user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
         }
     }
 
     // Called when the user sends a response to the last question, sends next question
-    public void update(User user, String answer) {
-        if (applications.containsKey(user)) {
-            
-            Application application = applications.get(user);
+    private void question(User user, String answer) {
+        Application application = applications.get(user);
 
-            // Username validation
-            if (application.getState().equals(Application.State.USERNAME)) {
-                if (minecraftUsernameIsValid(answer)) {
-                    // Check if Minecraft username already in members group
-                    if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(answer), config.getMemberGroup())) {
-                        user.openPrivateChannel().complete().sendMessage(messages.applicationUserAvatar(answer)).queue();
-                        application.setState(Application.State.SKIN);
-                    }
-                    else {
-                        String message = "This Minecraft username is already a member on this server. If you believe this is an error, contact a moderator.";
-                        user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
-                    }
-                }
-                else {
-                    String message = "The minecraft username you have provided is invalid and/or does not exist. Please type out only your username exactly as it shows in game.";
-                    user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
-                }
-            }
+        application.getAnswers().add(answer);
+        application.incrementQuestionStep();
 
-            // Check if skin correct
-            else if (application.getState().equals(Application.State.SKIN)) {
-                // Correct skin
-                if (user.getId().equals(answer)) {
-                    application.setState(Application.State.IN_PROGRESS);
-                }
-                // Incorrect skin
-                else {
-                    application.setState(Application.State.USERNAME);
-                    // Ask for username again
-                    String question = config.getQuestions().get(0);
-                    user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
-                }
-            }
+        // Send user next step of application
+        if (application.getQuestionStep() < config.getQuestions().size())
+            user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(config.getQuestions().get(application.getQuestionStep()))).queue();
+        // Post application
+        else {
+            user.openPrivateChannel().complete().sendMessage(messages.applicationUserComplete()).queue();
+            // Add and remove @here for ping
+            jda.getTextChannelById(config.getApplicationChannel()).sendMessage("@here").queue(message -> message.delete().queue());
+            // Send application
+            jda.getTextChannelById(config.getApplicationChannel())
+                    .sendMessage(messages.application(user, application.getAnswers()))
+                    .queue((message) -> application.setApplicationMessage(message));
 
-            // Other questions
-            if (application.getState().equals(Application.State.IN_PROGRESS)) {
-                application.getAnswers().add(answer);
-                application.incrementQuestionStep();
-
-                // Send user next step of application
-                if (application.getQuestionStep() < config.getQuestions().size())
-                    user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(config.getQuestions().get(application.getQuestionStep()))).queue();
-                    // Post application
-                else {
-                    user.openPrivateChannel().complete().sendMessage(messages.applicationUserComplete()).queue();
-                    // Add and remove @here for ping
-                    jda.getTextChannelById(config.getApplicationChannel()).sendMessage("@here").queue(message -> message.delete().queue());
-                    // Send application
-                    jda.getTextChannelById(config.getApplicationChannel())
-                            .sendMessage(messages.application(user, application.getAnswers()))
-                            .queue((message) -> application.setApplicationMessage(message));
-
-                    application.setState(Application.State.SUBMITTED);
-                }
-            }
+            application.setState(Application.State.SUBMITTED);
         }
     }
 
@@ -185,7 +210,7 @@ public class ApplicationManager {
     }
 
     private boolean minecraftUsernameIsValid(String username) {
-        return username.length() >= 3 && username.length() <= 16 && username.matches("\\w+") && validateMinecraftUsernameWithAPI(username);
+        return username != null && username.length() >= 3 && username.length() <= 16 && username.matches("\\w+") && validateMinecraftUsernameWithAPI(username);
     }
 
     private boolean validateMinecraftUsernameWithAPI(String username){
@@ -224,12 +249,20 @@ public class ApplicationManager {
     private static class Application {
 
         private State state = State.NOT_STARTED;
+        private String username = null;
         private int questionStep = 0;
         private ArrayList<String> answers = new ArrayList<>();
         private boolean waitingForReason = false;
         private User rejector = null;
-
         private Message applicationMessage = null;
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
 
         public State getState() {
             return state;

@@ -16,11 +16,11 @@ public class JDAListener extends ListenerAdapter {
     public void onButtonClick(ButtonClickEvent event) {
         if (event.getButton().getId().equals("apply")) {
             event.deferEdit().queue();
-            applicationManager.newApplication(event.getUser());
+            applicationManager.create(event.getUser());
         }
         else if (event.getButton().getId().equals("applicationStart")) {
             event.deferEdit().queue();
-            applicationManager.startApplication(event.getUser());
+            applicationManager.update(event.getUser());
         }
         else if (event.getButton().getId().contains("acceptSkin")) {
             event.deferEdit().queue();
