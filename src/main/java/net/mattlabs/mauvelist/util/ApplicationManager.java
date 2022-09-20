@@ -89,11 +89,13 @@ public class ApplicationManager {
             else {
                 String message = "This Minecraft username is already a member on this server. If you believe this is an error, contact a moderator.";
                 user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
+                user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(config.getQuestions().get(0))).queue();
             }
         }
         else {
             String message = "The minecraft username you have provided is invalid and/or does not exist. Please type out only your username exactly as it shows in game.";
             user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
+            user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(config.getQuestions().get(0))).queue();
         }
     }
 
