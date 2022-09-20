@@ -134,18 +134,19 @@ public class Messages {
         long epoch = System.currentTimeMillis() / 1000;
         String description = "**@here, " + user.getName() + " has applied for the server. Here is their application:**\n\n" +
                 "Discord username: " + user.getAsMention() + "\n" +
+                "Minecraft username: `" + answers.get(0) + "`\n" +
                 "Time submitted: <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*\n\n" +
                 "**Question responses:**\n\n";
 
         ArrayList<String> questions = mauveList.getConfigML().getQuestions();
-        description = description.concat("*" + questions.get(0) + "*\n`" + answers.get(0) + "`\n\n");
         for (int i = 1; i < questions.size(); i++)
             description = description.concat("*" + questions.get(i) + "*\n" + answers.get(i) + "\n\n");
 
         description = description.concat("Please click **Accept** or **Reject** below.");
 
-        builder.setEmbeds(new EmbedBuilder().setTitle("Applicant: " + user.getName())
+        builder.setEmbeds(new EmbedBuilder().setAuthor("Applicant: " + user.getName() + " \uD83D\uDCE5", null, user.getAvatarUrl())
                 .setDescription(description)
+                .setThumbnail("https://crafatar.com/renders/body/" + Bukkit.getOfflinePlayer(answers.get(0)).getUniqueId() + "?overlay")
                 .setColor(161240)
                 .build());
 
@@ -156,7 +157,7 @@ public class Messages {
     public Message applicationAccepted(User user, String minecraftUsername, User acceptor) {
         long epoch = System.currentTimeMillis() / 1000;
         MessageBuilder builder = new MessageBuilder();
-        builder.setEmbeds(new EmbedBuilder().setTitle("Application accepted for " + user.getName())
+        builder.setEmbeds(new EmbedBuilder().setAuthor("Application accepted for " + user.getName() + " ✅", null, user.getAvatarUrl())
                 .setDescription("`" + minecraftUsername + "` is now a member.\n\n" +
                         "Accepted by " + acceptor.getAsMention() + " on <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*.")
                 .setColor(2664261)
@@ -166,7 +167,7 @@ public class Messages {
 
     public Message applicationRejectReason(User user) {
         MessageBuilder builder = new MessageBuilder();
-        builder.setEmbeds(new EmbedBuilder().setTitle("What is the reason for rejecting " + user.getName() + "?")
+        builder.setEmbeds(new EmbedBuilder().setAuthor("What is the reason for rejecting " + user.getName() + "?", null, user.getAvatarUrl())
                 .setColor(14242639)
                 .build());
         builder.setActionRows(ActionRow.of(Button.secondary("rejectNoReason:" + user.getId(), "No Reason")));
@@ -176,7 +177,7 @@ public class Messages {
     public Message applicationRejected(User user, String minecraftUsername, User rejector, String reason) {
         long epoch = System.currentTimeMillis() / 1000;
         MessageBuilder builder = new MessageBuilder();
-        builder.setEmbeds(new EmbedBuilder().setTitle("Application rejected for " + user.getName())
+        builder.setEmbeds(new EmbedBuilder().setAuthor("Application rejected for " + user.getName() + " ⛔", null, user.getAvatarUrl())
                 .setDescription("`" + minecraftUsername + "` will not be added as a member, application discarded.\n\n" +
                         "Reason: " + reason + "\n\n" +
                         "Rejected by " + rejector.getAsMention() + " on <t:" + epoch + ":F> *(<t:" + epoch + ":R>)*.")

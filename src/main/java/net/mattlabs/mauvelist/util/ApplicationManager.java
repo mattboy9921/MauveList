@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,12 +115,22 @@ public class ApplicationManager {
     // Called when a moderator clicks "Accept" on an application
     public void accept(User user, User acceptor) {
         Application application = applications.get(user);
-        application.getApplicationMessage().editMessageComponents(ActionRow.of(Button.success("disabled" + user.getId(), "Accepted").asDisabled(), Button.secondary("disabled", "Reject").asDisabled())).queue();
+
+        // Edit application message buttons
+        application.getApplicationMessage().editMessageComponents(ActionRow.of(
+                Button.success("disabled" + user.getId(), "Accepted").asDisabled(),
+                Button.secondary("disabled", "Reject").asDisabled())).queue();
+
+        // Add Minecraft user
         Bukkit.getScheduler().runTask(mauveList, () -> {
             Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ml add " + application.answers.get(0));
+
             Bukkit.getScheduler().runTaskAsynchronously(mauveList, () -> {
+                // Update applications channel
                 jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationAccepted(user, application.getAnswers().get(0), acceptor)).queue();
+                // Update user
                 user.openPrivateChannel().complete().sendMessage(messages.applicationUserAccepted()).queue();
+
                 applications.remove(user);
             });
         });
@@ -129,11 +140,20 @@ public class ApplicationManager {
     // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
     public void rejectStart(User user, User rejector) {
         Application application = applications.get(user);
-        application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.getApplicationMessage().getEmbeds().get(0)).setFooter("Being reviewed by " + user.getName() + ".").build()).queue();
-        application.getApplicationMessage().editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
+
+        // Edit application message footer/buttons
+        application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.getApplicationMessage().getEmbeds().get(0))
+                .setFooter("Being reviewed by " + user.getName(), user.getAvatarUrl()).setTimestamp(Instant.now()).build()).queue();
+        application.getApplicationMessage().editMessageComponents(ActionRow.of(
+                Button.secondary("disabled" + user.getId(), "Accept").asDisabled(),
+                Button.danger("disabled", "Rejected").asDisabled())).queue();
+
+        // Update application
         application.setWaitingForReason(true);
         application.setRejector(rejector);
         application.setState(Application.State.UNDER_REVIEW);
+
+        // Ask rejector for reason
         rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(rejector)).queue();
     }
 
@@ -149,7 +169,10 @@ public class ApplicationManager {
 
     public void rejectConfirm(User user, User rejector, String reason) {
         Application application = applications.get(user);
+
+        // Edit application message footer
         application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.applicationMessage.getEmbeds().get(0)).setFooter(null).build()).queue();
+
         try {
             jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationRejected(user, application.getAnswers().get(0), rejector, reason)).queue();
             user.openPrivateChannel().complete().sendMessage(messages.applicationUserRejected(reason)).queue();
