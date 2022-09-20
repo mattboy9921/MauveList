@@ -33,7 +33,8 @@ public class ApplicationManager {
         // Create new application
         applications.put(user, new Application());
         // Message user to start application
-        user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue();
+        user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue(
+                (message) -> applications.get(user).setIntroMessage(message));
     }
 
     public void update(User user) {
@@ -59,12 +60,17 @@ public class ApplicationManager {
 
     // Sends first question
     private void start(User user) {
-        if (applications.get(user).getState().equals(Application.State.NOT_STARTED)) {
-            applications.get(user).setState(Application.State.USERNAME);
-            // Send first question
-            String question = config.getQuestions().get(0);
-            user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
-        }
+        Application application = applications.get(user);
+
+        // Update intro message
+        application.getIntroMessage().editMessageComponents(ActionRow.of(
+                Button.success("applicationStart", "Start Application").asDisabled(),
+                Button.secondary("cancel", "Cancel").asDisabled())).queue();
+        // Update application
+        applications.get(user).setState(Application.State.USERNAME);
+        // Send first question
+        String question = config.getQuestions().get(0);
+        user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
     }
 
     // Called for username validation
@@ -75,7 +81,8 @@ public class ApplicationManager {
         if (minecraftUsernameIsValid(username)) {
             // Check if Minecraft username already in members group
             if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(username), config.getMemberGroup())) {
-                user.openPrivateChannel().complete().sendMessage(messages.applicationUserAvatar(username)).queue();
+                // Send skin check
+                user.openPrivateChannel().complete().sendMessage(messages.applicationUserSkin(username)).queue(application::setSkinMessage);
                 application.setUsername(username);
                 application.setState(Application.State.SKIN);
             }
@@ -96,6 +103,10 @@ public class ApplicationManager {
 
         // Correct skin
         if (confirmation) {
+            // Update skin message
+            application.getSkinMessage().editMessageComponents(ActionRow.of(
+                    Button.success("acceptSkin", "This is me").asDisabled(),
+                    Button.secondary("rejectSkin", "This is not me").asDisabled())).queue();
             // Update application
             application.getAnswers().add(application.getUsername());
             application.setState(Application.State.IN_PROGRESS);
@@ -106,6 +117,11 @@ public class ApplicationManager {
         }
         // Incorrect skin
         else {
+            // Update skin message
+            application.getSkinMessage().editMessageComponents(ActionRow.of(
+                    Button.secondary("acceptSkin", "This is me").asDisabled(),
+                    Button.danger("rejectSkin", "This is not me").asDisabled())).queue();
+            // Update application
             application.setState(Application.State.USERNAME);
             // Ask for username again
             String question = config.getQuestions().get(0);
@@ -254,6 +270,8 @@ public class ApplicationManager {
         private ArrayList<String> answers = new ArrayList<>();
         private boolean waitingForReason = false;
         private User rejector = null;
+        private Message introMessage = null;
+        private Message skinMessage = null;
         private Message applicationMessage = null;
 
         public String getUsername() {
@@ -302,6 +320,22 @@ public class ApplicationManager {
 
         public void setRejector(User rejector) {
             this.rejector = rejector;
+        }
+
+        public Message getIntroMessage() {
+            return introMessage;
+        }
+
+        public void setIntroMessage(Message introMessage) {
+            this.introMessage = introMessage;
+        }
+
+        public Message getSkinMessage() {
+            return skinMessage;
+        }
+
+        public void setSkinMessage(Message skinMessage) {
+            this.skinMessage = skinMessage;
         }
 
         public Message getApplicationMessage() {

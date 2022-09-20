@@ -99,7 +99,7 @@ public class Messages {
         return builder.build();
     }
 
-    public Message applicationUserAvatar(String username) {
+    public Message applicationUserSkin(String username) {
         MessageBuilder builder = new MessageBuilder();
         builder.setEmbeds(new EmbedBuilder().setTitle("Your Minecraft username is: `" + username + "`")
                 .setDescription("Is the skin below your Minecraft skin?")
