@@ -99,6 +99,26 @@ public class Messages {
         return builder.build();
     }
 
+    public Message applicationUserAvatar(String username) {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle("Your Minecraft username is: `" + username + "`")
+                .setDescription("Is the skin below your Minecraft skin?")
+                .setImage("https://crafatar.com/renders/body/" + Bukkit.getOfflinePlayer(username).getUniqueId() + "?overlay")
+                .setFooter("Please choose an option below.")
+                .setColor(161240)
+                .build());
+        builder.setActionRows(ActionRow.of(Button.success("acceptSkin:" + username, "This is me"), Button.danger("rejectSkin", "This is not me")));
+        return builder.build();
+    }
+
+    public Message applicationError(String message) {
+        MessageBuilder builder = new MessageBuilder();
+        builder.setEmbeds(new EmbedBuilder().setTitle("*" + message + "*")
+                .setColor(14242639)
+                .build());
+        return builder.build();
+    }
+
     public Message applicationUserComplete() {
         MessageBuilder builder = new MessageBuilder();
         builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())

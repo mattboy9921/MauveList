@@ -34,9 +34,10 @@ public class ApplicationManager {
     public void startApplication(User user) {
         if (applications.containsKey(user)) {
             if (applications.get(user).getState().equals(Application.State.NOT_STARTED)) {
-                applications.get(user).setState(Application.State.IN_PROGRESS);
+                applications.get(user).setState(Application.State.USERNAME);
                 // Send first question
-                user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserQuestion(mauveList.getConfigML().getQuestions().get(applications.get(user).getQuestionStep()))).queue();
+                String question = mauveList.getConfigML().getQuestions().get(0);
+                user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserQuestion(question)).queue();
             }
         }
     }
@@ -44,30 +45,60 @@ public class ApplicationManager {
     // Called when the user sends a response to the last question, sends next question
     public void update(User user, String answer) {
         if (applications.containsKey(user)) {
+
             // Username validation
-            if (applications.get(user).getQuestionStep() == 0) {
+            if (applications.get(user).getState().equals(Application.State.USERNAME)) {
                 if (minecraftUsernameIsValid(answer)) {
-                    applications.get(user).getAnswers().add(answer);
-                    applications.get(user).incrementQuestionStep();
-                } else {
-                    user.openPrivateChannel().complete().sendMessage("The minecraft username you have provided is invalid and/or does not exist. \n Please type out only your username exactly as it shows in game.").queue();
+                    // Check if Minecraft username already in members group
+                    if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(answer), mauveList.getConfigML().getMemberGroup())) {
+                        user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserAvatar(answer)).queue();
+                        applications.get(user).setState(Application.State.SKIN);
+                    }
+                    else {
+                        String message = "This Minecraft username is already a member on this server. If you believe this is an error, contact a moderator.";
+                        user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationError(message)).queue();
+                    }
                 }
-            } else {
+                else {
+                    String message = "The minecraft username you have provided is invalid and/or does not exist. Please type out only your username exactly as it shows in game.";
+                    user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationError(message)).queue();
+                }
+            }
+
+            // Check if skin correct
+            else if (applications.get(user).getState().equals(Application.State.SKIN)) {
+                // Correct skin
+                if (answer != null) {
+                    applications.get(user).getAnswers().add(answer);
+                    applications.get(user).setState(Application.State.IN_PROGRESS);
+                }
+                // Incorrect skin
+                else {
+                    applications.get(user).setState(Application.State.USERNAME);
+                    // Ask for username again
+                    String question = mauveList.getConfigML().getQuestions().get(0);
+                    user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserQuestion(question)).queue();
+                }
+            }
+
+            // Other questions
+            if (applications.get(user).getState().equals(Application.State.IN_PROGRESS)) {
                 applications.get(user).getAnswers().add(answer);
                 applications.get(user).incrementQuestionStep();
-            }
-            // Send user next step of application
-            if (applications.get(user).getQuestionStep() < mauveList.getConfigML().getQuestions().size())
-                user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserQuestion(mauveList.getConfigML().getQuestions().get(applications.get(user).getQuestionStep()))).queue();
-            // Post application
-            else {
-                user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserComplete()).queue();
-                // Add and remove @here for ping
-                jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage("@here").queue(message -> message.delete().queue());
-                // Send application
-                jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(mauveList.getMessages().application(user, applications.get(user).getAnswers())).queue();
 
-                applications.get(user).setState(Application.State.SUBMITTED);
+                // Send user next step of application
+                if (applications.get(user).getQuestionStep() < mauveList.getConfigML().getQuestions().size())
+                    user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserQuestion(mauveList.getConfigML().getQuestions().get(applications.get(user).getQuestionStep()))).queue();
+                    // Post application
+                else {
+                    user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserComplete()).queue();
+                    // Add and remove @here for ping
+                    jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage("@here").queue(message -> message.delete().queue());
+                    // Send application
+                    jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(mauveList.getMessages().application(user, applications.get(user).getAnswers())).queue();
+
+                    applications.get(user).setState(Application.State.SUBMITTED);
+                }
             }
         }
     }
@@ -178,6 +209,10 @@ public class ApplicationManager {
             questionStep++;
         }
 
+        public void decrementQuestionStep() {
+            questionStep--;
+        }
+
         public ArrayList<String> getAnswers() {
             return answers;
         }
@@ -200,6 +235,8 @@ public class ApplicationManager {
 
         public enum State {
             NOT_STARTED,
+            USERNAME,
+            SKIN,
             IN_PROGRESS,
             SUBMITTED,
             UNDER_REVIEW
