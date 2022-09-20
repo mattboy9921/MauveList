@@ -1,5 +1,6 @@
 package net.mattlabs.mauvelist.util;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -95,7 +96,9 @@ public class ApplicationManager {
                     // Add and remove @here for ping
                     jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage("@here").queue(message -> message.delete().queue());
                     // Send application
-                    jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(mauveList.getMessages().application(user, applications.get(user).getAnswers())).queue();
+                    jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel())
+                            .sendMessage(mauveList.getMessages().application(user, applications.get(user).getAnswers()))
+                            .queue((message) -> applications.get(user).setApplicationMessage(message));
 
                     applications.get(user).setState(Application.State.SUBMITTED);
                 }
@@ -104,8 +107,8 @@ public class ApplicationManager {
     }
 
     // Called when a moderator clicks "Accept" on an application
-    public void accept(User user, Message message, User acceptor) {
-        message.editMessageComponents(ActionRow.of(Button.success("disabled" + user.getId(), "Accepted").asDisabled(), Button.secondary("disabled", "Reject").asDisabled())).queue();
+    public void accept(User user, User acceptor) {
+        applications.get(user).getApplicationMessage().editMessageComponents(ActionRow.of(Button.success("disabled" + user.getId(), "Accepted").asDisabled(), Button.secondary("disabled", "Reject").asDisabled())).queue();
         Bukkit.getScheduler().runTask(mauveList, () -> {
             Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ml add " + applications.get(user).answers.get(0));
             Bukkit.getScheduler().runTaskAsynchronously(mauveList, () -> {
@@ -118,8 +121,9 @@ public class ApplicationManager {
     }
 
     // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
-    public void rejectStart(User user, Message message, User rejector) {
-        message.editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
+    public void rejectStart(User user, User rejector) {
+        applications.get(user).getApplicationMessage().editMessageEmbeds(new EmbedBuilder(applications.get(user).getApplicationMessage().getEmbeds().get(0)).setFooter("Being reviewed by " + user.getName() + ".").build()).queue();
+        applications.get(user).getApplicationMessage().editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
         applications.get(user).setWaitingForReason(true);
         applications.get(user).setRejector(rejector);
         applications.get(user).setState(Application.State.UNDER_REVIEW);
@@ -137,6 +141,7 @@ public class ApplicationManager {
     }
 
     public void rejectConfirm(User user, User rejector, String reason) {
+        applications.get(user).getApplicationMessage().editMessageEmbeds(new EmbedBuilder(applications.get(user).applicationMessage.getEmbeds().get(0)).setFooter(null).build()).queue();
         try {
             jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(mauveList.getMessages().applicationRejected(user, applications.get(user).getAnswers().get(0), rejector, reason)).queue();
             user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserRejected(reason)).queue();
@@ -193,6 +198,8 @@ public class ApplicationManager {
         private boolean waitingForReason = false;
         private User rejector = null;
 
+        private Message applicationMessage = null;
+
         public State getState() {
             return state;
         }
@@ -231,6 +238,14 @@ public class ApplicationManager {
 
         public void setRejector(User rejector) {
             this.rejector = rejector;
+        }
+
+        public Message getApplicationMessage() {
+            return applicationMessage;
+        }
+
+        public void setApplicationMessage(Message applicationMessage) {
+            this.applicationMessage = applicationMessage;
         }
 
         public enum State {

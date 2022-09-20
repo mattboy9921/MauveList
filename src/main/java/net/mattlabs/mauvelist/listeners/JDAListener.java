@@ -34,12 +34,12 @@ public class JDAListener extends ListenerAdapter {
         else if (event.getButton().getId().contains("applicationAccept")) {
             event.deferEdit().queue();
             String[] parts = event.getButton().getId().split(":");
-            applicationManager.accept(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getMessage(), event.getUser());
+            applicationManager.accept(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getUser());
         }
         else if (event.getButton().getId().contains("applicationReject")) {
             event.deferEdit().queue();
             String[] parts = event.getButton().getId().split(":");
-            applicationManager.rejectStart(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getMessage(), event.getUser());
+            applicationManager.rejectStart(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getUser());
         }
         else if (event.getButton().getId().contains("rejectNoReason")) {
             event.deferEdit().queue();
