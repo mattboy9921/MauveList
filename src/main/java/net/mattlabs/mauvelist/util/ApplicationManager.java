@@ -6,7 +6,9 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
+import net.mattlabs.mauvelist.Config;
 import net.mattlabs.mauvelist.MauveList;
+import net.mattlabs.mauvelist.messaging.Messages;
 import org.bukkit.Bukkit;
 
 import java.io.IOException;
@@ -20,6 +22,8 @@ import java.util.Map.Entry;
 public class ApplicationManager {
 
     private final MauveList mauveList = MauveList.getInstance();
+    private final Messages messages = mauveList.getMessages();
+    private final Config config = mauveList.getConfigML();
     private final JDA jda = mauveList.getJda();
     private final Map<User, Application> applications = new HashMap<>();
 
@@ -28,7 +32,7 @@ public class ApplicationManager {
         // Create new application
         applications.put(user, new Application());
         // Message user to start application
-        user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserIntro()).queue();
+        user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue();
     }
 
     // Called when user clicks the "Start Application" button, starts the application process
@@ -37,8 +41,8 @@ public class ApplicationManager {
             if (applications.get(user).getState().equals(Application.State.NOT_STARTED)) {
                 applications.get(user).setState(Application.State.USERNAME);
                 // Send first question
-                String question = mauveList.getConfigML().getQuestions().get(0);
-                user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserQuestion(question)).queue();
+                String question = config.getQuestions().get(0);
+                user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
             }
         }
     }
@@ -46,61 +50,63 @@ public class ApplicationManager {
     // Called when the user sends a response to the last question, sends next question
     public void update(User user, String answer) {
         if (applications.containsKey(user)) {
+            
+            Application application = applications.get(user);
 
             // Username validation
-            if (applications.get(user).getState().equals(Application.State.USERNAME)) {
+            if (application.getState().equals(Application.State.USERNAME)) {
                 if (minecraftUsernameIsValid(answer)) {
                     // Check if Minecraft username already in members group
-                    if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(answer), mauveList.getConfigML().getMemberGroup())) {
-                        user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserAvatar(answer)).queue();
-                        applications.get(user).setState(Application.State.SKIN);
+                    if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(answer), config.getMemberGroup())) {
+                        user.openPrivateChannel().complete().sendMessage(messages.applicationUserAvatar(answer)).queue();
+                        application.setState(Application.State.SKIN);
                     }
                     else {
                         String message = "This Minecraft username is already a member on this server. If you believe this is an error, contact a moderator.";
-                        user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationError(message)).queue();
+                        user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
                     }
                 }
                 else {
                     String message = "The minecraft username you have provided is invalid and/or does not exist. Please type out only your username exactly as it shows in game.";
-                    user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationError(message)).queue();
+                    user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
                 }
             }
 
             // Check if skin correct
-            else if (applications.get(user).getState().equals(Application.State.SKIN)) {
+            else if (application.getState().equals(Application.State.SKIN)) {
                 // Correct skin
                 if (answer != null) {
-                    applications.get(user).getAnswers().add(answer);
-                    applications.get(user).setState(Application.State.IN_PROGRESS);
+                    application.getAnswers().add(answer);
+                    application.setState(Application.State.IN_PROGRESS);
                 }
                 // Incorrect skin
                 else {
-                    applications.get(user).setState(Application.State.USERNAME);
+                    application.setState(Application.State.USERNAME);
                     // Ask for username again
-                    String question = mauveList.getConfigML().getQuestions().get(0);
-                    user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserQuestion(question)).queue();
+                    String question = config.getQuestions().get(0);
+                    user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(question)).queue();
                 }
             }
 
             // Other questions
-            if (applications.get(user).getState().equals(Application.State.IN_PROGRESS)) {
-                applications.get(user).getAnswers().add(answer);
-                applications.get(user).incrementQuestionStep();
+            if (application.getState().equals(Application.State.IN_PROGRESS)) {
+                application.getAnswers().add(answer);
+                application.incrementQuestionStep();
 
                 // Send user next step of application
-                if (applications.get(user).getQuestionStep() < mauveList.getConfigML().getQuestions().size())
-                    user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserQuestion(mauveList.getConfigML().getQuestions().get(applications.get(user).getQuestionStep()))).queue();
+                if (application.getQuestionStep() < config.getQuestions().size())
+                    user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(config.getQuestions().get(application.getQuestionStep()))).queue();
                     // Post application
                 else {
-                    user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserComplete()).queue();
+                    user.openPrivateChannel().complete().sendMessage(messages.applicationUserComplete()).queue();
                     // Add and remove @here for ping
-                    jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage("@here").queue(message -> message.delete().queue());
+                    jda.getTextChannelById(config.getApplicationChannel()).sendMessage("@here").queue(message -> message.delete().queue());
                     // Send application
-                    jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel())
-                            .sendMessage(mauveList.getMessages().application(user, applications.get(user).getAnswers()))
-                            .queue((message) -> applications.get(user).setApplicationMessage(message));
+                    jda.getTextChannelById(config.getApplicationChannel())
+                            .sendMessage(messages.application(user, application.getAnswers()))
+                            .queue((message) -> application.setApplicationMessage(message));
 
-                    applications.get(user).setState(Application.State.SUBMITTED);
+                    application.setState(Application.State.SUBMITTED);
                 }
             }
         }
@@ -108,12 +114,13 @@ public class ApplicationManager {
 
     // Called when a moderator clicks "Accept" on an application
     public void accept(User user, User acceptor) {
-        applications.get(user).getApplicationMessage().editMessageComponents(ActionRow.of(Button.success("disabled" + user.getId(), "Accepted").asDisabled(), Button.secondary("disabled", "Reject").asDisabled())).queue();
+        Application application = applications.get(user);
+        application.getApplicationMessage().editMessageComponents(ActionRow.of(Button.success("disabled" + user.getId(), "Accepted").asDisabled(), Button.secondary("disabled", "Reject").asDisabled())).queue();
         Bukkit.getScheduler().runTask(mauveList, () -> {
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ml add " + applications.get(user).answers.get(0));
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ml add " + application.answers.get(0));
             Bukkit.getScheduler().runTaskAsynchronously(mauveList, () -> {
-                jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(mauveList.getMessages().applicationAccepted(user, applications.get(user).getAnswers().get(0), acceptor)).queue();
-                user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserAccepted()).queue();
+                jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationAccepted(user, application.getAnswers().get(0), acceptor)).queue();
+                user.openPrivateChannel().complete().sendMessage(messages.applicationUserAccepted()).queue();
                 applications.remove(user);
             });
         });
@@ -122,12 +129,13 @@ public class ApplicationManager {
 
     // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
     public void rejectStart(User user, User rejector) {
-        applications.get(user).getApplicationMessage().editMessageEmbeds(new EmbedBuilder(applications.get(user).getApplicationMessage().getEmbeds().get(0)).setFooter("Being reviewed by " + user.getName() + ".").build()).queue();
-        applications.get(user).getApplicationMessage().editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
-        applications.get(user).setWaitingForReason(true);
-        applications.get(user).setRejector(rejector);
-        applications.get(user).setState(Application.State.UNDER_REVIEW);
-        rejector.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationRejectReason(rejector)).queue();
+        Application application = applications.get(user);
+        application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.getApplicationMessage().getEmbeds().get(0)).setFooter("Being reviewed by " + user.getName() + ".").build()).queue();
+        application.getApplicationMessage().editMessageComponents(ActionRow.of(Button.secondary("disabled" + user.getId(), "Accept").asDisabled(), Button.danger("disabled", "Rejected").asDisabled())).queue();
+        application.setWaitingForReason(true);
+        application.setRejector(rejector);
+        application.setState(Application.State.UNDER_REVIEW);
+        rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(rejector)).queue();
     }
 
     // Called when mod responds with reason or clicks no reason
@@ -141,15 +149,16 @@ public class ApplicationManager {
     }
 
     public void rejectConfirm(User user, User rejector, String reason) {
-        applications.get(user).getApplicationMessage().editMessageEmbeds(new EmbedBuilder(applications.get(user).applicationMessage.getEmbeds().get(0)).setFooter(null).build()).queue();
+        Application application = applications.get(user);
+        application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.applicationMessage.getEmbeds().get(0)).setFooter(null).build()).queue();
         try {
-            jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(mauveList.getMessages().applicationRejected(user, applications.get(user).getAnswers().get(0), rejector, reason)).queue();
-            user.openPrivateChannel().complete().sendMessage(mauveList.getMessages().applicationUserRejected(reason)).queue();
+            jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationRejected(user, application.getAnswers().get(0), rejector, reason)).queue();
+            user.openPrivateChannel().complete().sendMessage(messages.applicationUserRejected(reason)).queue();
             applications.remove(user);
         }
         catch (NullPointerException e) {
             e.printStackTrace();
-            jda.getTextChannelById(mauveList.getConfigML().getApplicationChannel()).sendMessage(mauveList.getMessages().applicationFailed(e.getMessage())).queue();
+            jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationFailed(e.getMessage())).queue();
         }
     }
 
