@@ -76,7 +76,7 @@ public class ApplicationManager {
             // Check if skin correct
             else if (application.getState().equals(Application.State.SKIN)) {
                 // Correct skin
-                if (answer != null) {
+                if (user.getId().equals(answer)) {
                     application.setState(Application.State.IN_PROGRESS);
                 }
                 // Incorrect skin

@@ -107,7 +107,7 @@ public class Messages {
                 .setFooter("Please choose an option below.")
                 .setColor(161240)
                 .build());
-        builder.setActionRows(ActionRow.of(Button.success("acceptSkin:" + username, "This is me"), Button.danger("rejectSkin", "This is not me")));
+        builder.setActionRows(ActionRow.of(Button.success("acceptSkin", "This is me"), Button.danger("rejectSkin", "This is not me")));
         return builder.build();
     }
 

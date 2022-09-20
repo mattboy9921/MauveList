@@ -24,8 +24,7 @@ public class JDAListener extends ListenerAdapter {
         }
         else if (event.getButton().getId().contains("acceptSkin")) {
             event.deferEdit().queue();
-            String[] parts = event.getButton().getId().split(":");
-            applicationManager.update(event.getUser(), parts[1]);
+            applicationManager.update(event.getUser(), event.getUser().getId());
         }
         else if (event.getButton().getId().contains("rejectSkin")) {
             event.deferEdit().queue();
