@@ -53,7 +53,7 @@ public class JDAListener extends ListenerAdapter {
             if (applicationManager.hasApplication(event.getAuthor())) {
                 applicationManager.update(event.getAuthor(), event.getMessage().getContentDisplay());
             }
-            else if (applicationManager.hasApplicationRejection(event.getAuthor())) {
+            else if (applicationManager.isReviewing(event.getAuthor())) {
                 applicationManager.reject(event.getAuthor(), event.getMessage().getContentDisplay());
             }
         }

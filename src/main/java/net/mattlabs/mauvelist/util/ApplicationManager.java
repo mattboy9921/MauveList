@@ -192,6 +192,7 @@ public class ApplicationManager {
             String message = "Your application review has timed out due to inactivity. If you wish to review again, please visit the server applications channel.";
             application.getRejector().openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
 
+            application.setRejector(null);
             application.setState(Application.State.SUBMITTED);
         }
         // Application in progress
@@ -231,30 +232,33 @@ public class ApplicationManager {
 
     // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
     public void review(User user, User rejector) {
-        Application application = applications.get(user);
+        // Make sure rejector isn't reviewing another application
+        if (!isReviewing(rejector)) {
+            Application application = applications.get(user);
 
-        // Edit application message footer/buttons
-        application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.getApplicationMessage().getEmbeds().get(0))
-                .setFooter("Being reviewed by " + user.getName(), user.getAvatarUrl()).setTimestamp(Instant.now()).build()).queue();
-        application.getApplicationMessage().editMessageComponents(ActionRow.of(
-                Button.secondary("disabled" + user.getId(), "Accept").asDisabled(),
-                Button.danger("disabled", "Rejected").asDisabled())).queue();
+            // Edit application message footer/buttons
+            application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.getApplicationMessage().getEmbeds().get(0))
+                    .setFooter("Being reviewed by " + user.getName(), user.getAvatarUrl()).setTimestamp(Instant.now()).build()).queue();
+            application.getApplicationMessage().editMessageComponents(ActionRow.of(
+                    Button.secondary("disabled" + user.getId(), "Accept").asDisabled(),
+                    Button.danger("disabled", "Rejected").asDisabled())).queue();
 
-        // Update application
-        application.setWaitingForReason(true);
-        application.setRejector(rejector);
-        application.startTimeout();
-        application.setState(Application.State.UNDER_REVIEW);
+            // Update application
+            application.setWaitingForReason(true);
+            application.setRejector(rejector);
+            application.startTimeout();
+            application.setState(Application.State.UNDER_REVIEW);
 
-        // Ask rejector for reason
-        rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(rejector)).queue(application::setReviewMessage);
+            // Ask rejector for reason
+            rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(user)).queue(application::setReviewMessage);
+        }
     }
 
     // Called when mod responds with reason or clicks no reason
     public void reject(User rejector, String reason) {
         User user = null;
         for (Entry<User, Application> entry : applications.entrySet())
-            if (entry.getValue().isWaitingForReason())
+            if (entry.getValue().getRejector() != null)
                 if (entry.getValue().getRejector().equals(rejector))
                     user = entry.getKey();
         reject(user, rejector, reason);
@@ -309,13 +313,13 @@ public class ApplicationManager {
         return applications.containsKey(user);
     }
 
-    public boolean hasApplicationRejection(User user) {
-        boolean appRejection = false;
-        for (Application application : applications.values())
-            if (application.isWaitingForReason())
-                if (application.getRejector().equals(user))
-                    appRejection = true;
-        return appRejection;
+    // Checks if rejector already reviewing another application
+    public boolean isReviewing(User user) {
+        boolean reviewer = false;
+        for (Entry<User, Application> entry : applications.entrySet())
+            if (entry.getValue().getRejector() != null)
+                reviewer = entry.getValue().getRejector().equals(user);
+        return reviewer;
     }
 
     private static class Application {
