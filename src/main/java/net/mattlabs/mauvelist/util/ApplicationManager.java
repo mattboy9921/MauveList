@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 public class ApplicationManager {
 
@@ -28,6 +29,7 @@ public class ApplicationManager {
     private final Messages messages = mauveList.getMessages();
     private final Config config = mauveList.getConfigML();
     private final JDA jda = mauveList.getJda();
+    private final Logger logger = mauveList.getLogger();
     private final Map<User, Application> applications = new HashMap<>();
 
     // Add a new Discord user to the applications map
@@ -40,6 +42,8 @@ public class ApplicationManager {
             // Message user to start application
             user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue(
                     (message) -> applications.get(user).setIntroMessage(message));
+
+            logger.info("An application for " + user.getName() + " has been started.");
         }
     }
 
@@ -160,6 +164,8 @@ public class ApplicationManager {
 
             application.stopTimeout();
             application.setState(Application.State.SUBMITTED);
+
+            logger.info("Application for " + user.getName() + " has been submitted.");
         }
     }
 
@@ -196,6 +202,8 @@ public class ApplicationManager {
             String message = "Your application review has timed out due to inactivity. If you wish to review again, please visit the server applications channel.";
             application.getRejector().openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
 
+            logger.info("Application review for " + user.getName() + " by " + application.getRejector().getName() + " has timed out due to inactivity.");
+
             application.setRejector(null);
             application.setState(Application.State.SUBMITTED);
         }
@@ -204,6 +212,8 @@ public class ApplicationManager {
             // Inform user
             String message = "Your application has timed out due to inactivity. If you wish to apply again, please visit the server apply channel and click apply.";
             user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
+
+            logger.info(user.getName() + "'s application has timed out due to inactivity.");
 
             applications.remove(user);
         }
@@ -234,6 +244,8 @@ public class ApplicationManager {
             });
         });
 
+        logger.info("Application for " + user.getName() + " has been accepted by " + acceptor.getName() + ".");
+
     }
 
     // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
@@ -244,7 +256,7 @@ public class ApplicationManager {
 
             // Edit application message footer/buttons
             application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.getApplicationMessage().getEmbeds().get(0))
-                    .setFooter("Being reviewed by " + user.getName(), user.getAvatarUrl()).setTimestamp(Instant.now()).build()).queue();
+                    .setFooter("Being reviewed by " + rejector.getName(), rejector.getAvatarUrl()).setTimestamp(Instant.now()).build()).queue();
             application.getApplicationMessage().editMessageComponents(ActionRow.of(
                     Button.secondary("disabled" + user.getId(), "Accept").asDisabled(),
                     Button.danger("disabled", "Rejected").asDisabled())).queue();
@@ -257,6 +269,8 @@ public class ApplicationManager {
 
             // Ask rejector for reason
             rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(user)).queue(application::setReviewMessage);
+
+            logger.info("Application for " + user.getName() + " is under review by " + rejector.getName() + ".");
         }
     }
 
@@ -288,6 +302,8 @@ public class ApplicationManager {
                 Button.secondary("rejectNoReason:" + user.getId(), "No Reason").asDisabled())).queue();
         // Update user
         if (reason != null) user.openPrivateChannel().complete().sendMessage(messages.applicationUserRejected(reason)).queue();
+
+        logger.info("Application for " + user.getName() + " was rejected by " + rejector.getName() + " for reason: " + (reason == null ? "No reason given." : reason));
 
         application.stopTimeout();
         applications.remove(user);
@@ -427,7 +443,10 @@ public class ApplicationManager {
         }
 
         public void startTimeout() {
-            timeout = Bukkit.getScheduler().runTaskLaterAsynchronously(MauveList.getInstance(), this::triggerTimeout, 600);
+            timeout = Bukkit.getScheduler().runTaskLaterAsynchronously(
+                    MauveList.getInstance(),
+                    this::triggerTimeout,
+                    MauveList.getInstance().getConfigML().getTimeout());
         }
 
         public void restartTimeout() {

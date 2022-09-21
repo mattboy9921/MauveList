@@ -62,6 +62,13 @@ public class Config {
         return permissionType;
     }
 
+    @Comment("\nThe application/review timeout in ticks")
+    private long timeout = 6000;
+
+    public long getTimeout() {
+        return timeout;
+    }
+
     @Comment("\nThe channel where players will see the application info and button")
     private String applyChannel = "000000000000000000";
 
