@@ -91,21 +91,21 @@ public class MauveList extends JavaPlugin {
         // Create Messages
         messages = new Messages();
 
-        // Set Up JDA
         if (getConfigML().isEnableDiscord()) {
+            // Set Up JDA
             try {
                 jda = JDABuilder.createDefault(config.getBotToken()).setStatus(getOnlineStatusFromString(config.getBotStatus())).build();
             } catch (LoginException e) {
                 e.printStackTrace();
                 this.setEnabled(false);
             }
+
+            // Create ApplicationManager
+            applicationManager = new ApplicationManager();
+
+            // Register JDA Listener
+            jda.addEventListener(new JDAListener());
         }
-
-        // Create ApplicationManager
-        applicationManager = new ApplicationManager();
-
-        // Register JDA Listener
-        if (getConfigML().isEnableDiscord()) jda.addEventListener(new JDAListener());
 
         // Register ACF
         paperCommandManager = new PaperCommandManager(this);
