@@ -31,12 +31,15 @@ public class ApplicationManager {
 
     // Add a new Discord user to the applications map
     public void create(User user) {
-        // Create new application
-        applications.put(user, new Application(user));
-        applications.get(user).startTimeout();
-        // Message user to start application
-        user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue(
-                (message) -> applications.get(user).setIntroMessage(message));
+        // Check if user has application
+        if (!hasApplication(user)) {
+            // Create new application
+            applications.put(user, new Application(user));
+            applications.get(user).startTimeout();
+            // Message user to start application
+            user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue(
+                    (message) -> applications.get(user).setIntroMessage(message));
+        }
     }
 
     public void update(User user) {
