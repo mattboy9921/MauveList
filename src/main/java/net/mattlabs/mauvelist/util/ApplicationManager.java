@@ -230,7 +230,7 @@ public class ApplicationManager {
     }
 
     // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
-    public void rejectStart(User user, User rejector) {
+    public void review(User user, User rejector) {
         Application application = applications.get(user);
 
         // Edit application message footer/buttons
@@ -251,31 +251,36 @@ public class ApplicationManager {
     }
 
     // Called when mod responds with reason or clicks no reason
-    public void rejectConfirm(User rejector, String reason) {
+    public void reject(User rejector, String reason) {
         User user = null;
         for (Entry<User, Application> entry : applications.entrySet())
             if (entry.getValue().isWaitingForReason())
                 if (entry.getValue().getRejector().equals(rejector))
                     user = entry.getKey();
-        rejectConfirm(user, rejector, reason);
+        reject(user, rejector, reason);
     }
 
-    public void rejectConfirm(User user, User rejector, String reason) {
+    public void reject(User user, User rejector, String reason) {
         Application application = applications.get(user);
 
-        // Edit application message footer
-        application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.applicationMessage.getEmbeds().get(0)).setFooter(null).build()).queue();
+        // Update applications channel
+        application.getApplicationMessage().editMessageEmbeds(new EmbedBuilder(application.applicationMessage.getEmbeds().get(0))
+                .setFooter(null).build()).queue();
+        jda.getTextChannelById(config.getApplicationChannel()).sendMessage(
+                messages.applicationRejected(
+                        user,
+                        application.getAnswers().get(0),
+                        rejector,
+                        reason == null ? "No reason given." : reason))
+                .queue();
+        // Update rejector message
+        application.getReviewMessage().editMessageComponents(ActionRow.of(
+                Button.secondary("rejectNoReason:" + user.getId(), "No Reason").asDisabled())).queue();
+        // Update user
+        if (reason != null) user.openPrivateChannel().complete().sendMessage(messages.applicationUserRejected(reason)).queue();
 
-        try {
-            jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationRejected(user, application.getAnswers().get(0), rejector, reason)).queue();
-            user.openPrivateChannel().complete().sendMessage(messages.applicationUserRejected(reason)).queue();
-            application.stopTimeout();
-            applications.remove(user);
-        }
-        catch (NullPointerException e) {
-            e.printStackTrace();
-            jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationFailed(e.getMessage())).queue();
-        }
+        application.stopTimeout();
+        applications.remove(user);
     }
 
     private boolean minecraftUsernameIsValid(String username) {
