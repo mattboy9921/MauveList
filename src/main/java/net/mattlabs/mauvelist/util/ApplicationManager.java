@@ -1,5 +1,6 @@
 package net.mattlabs.mauvelist.util;
 
+import github.scarsz.discordsrv.DiscordSRV;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
@@ -226,6 +227,8 @@ public class ApplicationManager {
                 jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationAccepted(user, application.getAnswers().get(0), acceptor)).queue();
                 // Update user
                 user.openPrivateChannel().complete().sendMessage(messages.applicationUserAccepted()).queue();
+                // Link Discord
+                DiscordSRV.getPlugin().getAccountLinkManager().link(user.getId(), Bukkit.getPlayerUniqueId(application.getUsername()));
 
                 applications.remove(user);
             });

@@ -48,11 +48,6 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-        <!-- For ConfigManager -->
-        <repository>
-            <id>configmanager-repo</id>
-            <url>https://repo.mattlabs.net/repository/maven-public/</url>
-        </repository>
         <!-- For Configurate -->
         <repository>
             <id>sponge</id>
@@ -124,6 +119,13 @@
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
             <version>4.11.0</version>
+        </dependency>
+        <!-- For DiscordSRV -->
+        <dependency>
+            <groupId>com.discordsrv</groupId>
+            <artifactId>discordsrv</artifactId>
+            <version>1.25.0</version>
+            <scope>provided</scope>
         </dependency>
         <!-- For JDA -->
         <dependency>
