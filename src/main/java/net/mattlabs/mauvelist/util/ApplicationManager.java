@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.mattlabs.mauvelist.Config;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class ApplicationManager {
@@ -33,17 +35,30 @@ public class ApplicationManager {
     private final Map<User, Application> applications = new HashMap<>();
 
     // Add a new Discord user to the applications map
-    public void create(User user) {
+    public void create(User user, Interaction interaction) {
         // Check if user has application
         if (!hasApplication(user)) {
-            // Create new application
-            applications.put(user, new Application(user));
-            applications.get(user).startTimeout();
-            // Message user to start application
-            user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue(
-                    (message) -> applications.get(user).setIntroMessage(message));
+            // Check if user has linked MC account in members group
+            UUID linkedAccountUUID = DiscordSRV.getPlugin().getAccountLinkManager().getUuid(user.getId());
+            if (linkedAccountUUID != null && MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(linkedAccountUUID), config.getMemberGroup())) {
+                String message = "You are already a member on this server. If you believe this is an error, contact a moderator.";
+                interaction.getHook().sendMessage(message).setEphemeral(true).queue();
+            }
+            // No linked account
+            else {
+                // Create new application
+                applications.put(user, new Application(user));
+                applications.get(user).startTimeout();
+                // Message user to start application
+                user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue(
+                        (message) -> applications.get(user).setIntroMessage(message));
 
-            logger.info("An application for " + user.getName() + " has been started.");
+                logger.info("An application for " + user.getName() + " has been started.");
+            }
+        }
+        else {
+            String message = "You have already submitted an application. If you believe this is an error, contact a moderator.";
+            interaction.getHook().sendMessage(message).setEphemeral(true).queue();
         }
     }
 
