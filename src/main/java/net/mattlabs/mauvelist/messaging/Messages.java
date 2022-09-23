@@ -208,7 +208,7 @@ public class Messages {
     public Message applicationFailed(String reason) {
         MessageBuilder builder = new MessageBuilder();
         builder.setEmbeds(new EmbedBuilder().setTitle("Application failed")
-                .setDescription("Reason:\n" + reason)
+                .setDescription("Reason: " + reason)
                 .setColor(14242639)
                 .build());
         return builder.build();

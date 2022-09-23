@@ -14,9 +14,6 @@ import net.mattlabs.mauvelist.messaging.Messages;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,7 +101,7 @@ public class ApplicationManager {
         Application application = applications.get(user);
 
         // Username validation
-        if (minecraftUsernameIsValid(username)) {
+        if (PlayerUtils.minecraftUsernameIsValid(username)) {
             // Check if Minecraft username already in members group
             if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(username), config.getMemberGroup())) {
                 // Send skin check
@@ -244,23 +241,28 @@ public class ApplicationManager {
                 Button.secondary("disabled", "Reject").asDisabled())).queue();
 
         // Add Minecraft user
-        Bukkit.getScheduler().runTask(mauveList, () -> {
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "ml add " + application.answers.get(0));
+        try {
+            PlayerUtils.addPlayer(application.getAnswers().get(0), user.getId());
+        }
+        catch (NullPointerException | NumberFormatException e) {
+            // Update applications channel
+            jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationFailed(e.getMessage())).queue();
 
-            Bukkit.getScheduler().runTaskAsynchronously(mauveList, () -> {
-                // Update applications channel
-                jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationAccepted(user, application.getAnswers().get(0), acceptor)).queue();
-                // Update user
-                user.openPrivateChannel().complete().sendMessage(messages.applicationUserAccepted()).queue();
-                // Link Discord
-                DiscordSRV.getPlugin().getAccountLinkManager().link(user.getId(), Bukkit.getPlayerUniqueId(application.getUsername()));
+            applications.remove(user);
 
-                applications.remove(user);
-            });
-        });
+            logger.warning("Application for " + user.getName() + " has an error: " + e.getMessage());
+
+            return;
+        }
+
+        // Update applications channel
+        jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationAccepted(user, application.getAnswers().get(0), acceptor)).queue();
+        // Update user
+        user.openPrivateChannel().complete().sendMessage(messages.applicationUserAccepted()).queue();
+
+        applications.remove(user);
 
         logger.info("Application for " + user.getName() + " has been accepted by " + acceptor.getName() + ".");
-
     }
 
     // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
@@ -322,28 +324,6 @@ public class ApplicationManager {
 
         application.stopTimeout();
         applications.remove(user);
-    }
-
-    private boolean minecraftUsernameIsValid(String username) {
-        return username != null && username.length() >= 3 && username.length() <= 16 && username.matches("\\w+") && validateMinecraftUsernameWithAPI(username);
-    }
-
-    private boolean validateMinecraftUsernameWithAPI(String username){
-        String urlString = "https://api.mojang.com/users/profiles/minecraft/" + username;
-        try {
-            URL url = new URL(urlString);
-
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(500);
-            connection.setReadTimeout(500);
-
-            int statusCode = connection.getResponseCode();
-
-            return statusCode == 200;
-        } catch (IOException e) {
-            return false;
-        }
     }
 
     public boolean hasApplication(User user) {

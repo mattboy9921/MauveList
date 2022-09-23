@@ -8,8 +8,8 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.util.PlayerManager;
+import net.mattlabs.mauvelist.util.PlayerUtils;
 import net.milkbowl.vault.permission.Permission;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -48,28 +48,18 @@ public class MauveListCommand extends BaseCommand {
 
     @Subcommand("add")
     @Description("Adds specified player to member list.")
-    public void onAdd(CommandSender commandSender, String name) {
-        MauveList.getInstance().getServer().getScheduler().runTaskAsynchronously(MauveList.getInstance(), () -> {
-            if (mauveList.getConfigML().getPermissionType().equalsIgnoreCase("set")) {
-                String[] groups = permission.getPlayerGroups(null, Bukkit.getOfflinePlayer(name));
-                for (String group : groups) {
-                    if (!(mauveList.getConfigML().getMemberGroup().equals(group)))
-                        permission.playerRemoveGroup(null, Bukkit.getOfflinePlayer(name), group);
-                }
-            }
-            if (!(permission.playerAddGroup(null, Bukkit.getOfflinePlayer(name),
-                    mauveList.getConfigML().getMemberGroup()))) {
-                if (commandSender instanceof Player) mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().couldNotAdd());
-                MauveList.getInstance().getLogger().warning("Could not add member, check member-group in config!");
-            }
-            else {
-                if (commandSender instanceof Player) mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().nowAMember(name));
-                MauveList.getInstance().getLogger().info(name + " is now a member!");
-                if (Bukkit.getOfflinePlayer(name).isOnline()) MauveList.getInstance().getServer().getScheduler().runTask(MauveList.getInstance(), () -> {
-                    Bukkit.getPlayer(name).kickPlayer("Rejoin in 30 seconds, you are now a member!");
-                });
-            }
-        });
+    public void onAdd(CommandSender commandSender, String name, String discordID) {
+        try {
+            PlayerUtils.addPlayer(name, discordID);
+        }
+        catch (NullPointerException | NumberFormatException e) {
+            mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().couldNotAdd());
+            mauveList.getLogger().warning("Adding " + name + " has failed with error: " + e.getMessage());
+            return;
+        }
+
+        mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().nowAMember(name));
+        mauveList.getLogger().info(name + " is now a member!");
     }
 
     @Subcommand("applymessage|am")
