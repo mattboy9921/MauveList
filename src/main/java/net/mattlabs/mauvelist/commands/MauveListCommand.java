@@ -11,7 +11,6 @@ import net.mattlabs.mauvelist.util.PlayerManager;
 import net.mattlabs.mauvelist.util.PlayerUtils;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 @CommandAlias("mauvelist|ml")
 @CommandPermission("mauvelist.admin")
@@ -25,25 +24,6 @@ public class MauveListCommand extends BaseCommand {
     @Description("MauveList base command.")
     public void onDefault(CommandSender commandSender) {
         mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().version());
-    }
-
-    @Subcommand("reload")
-    @Description("Reloads configuration.")
-    public void onReload(CommandSender commandSender) {
-        mauveList.reload();
-        if (commandSender instanceof Player) mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().reloaded());
-    }
-
-    @Subcommand("list")
-    @Description("Shows last 10 joined nonmembers.")
-    public void onList(CommandSender commandSender) {
-        mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().lastTenGuestsHeading());
-        for (int i = 0; i < playerManager.getNonMemberName().size(); i++)
-            mauveList.getPlatform().sender(commandSender).sendMessage(mauveList.getMessages().lastTenGuestsListing(
-                    playerManager.getNonMemberName().get(i),
-                    playerManager.getNonMemberUUID().get(i).toString(),
-                    playerManager.getNonMemberDate().get(i)
-            ));
     }
 
     @Subcommand("add")
