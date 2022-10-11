@@ -12,3 +12,5 @@ loadbefore:
 permissions:
   mauvelist.grey:
     description: Makes user part of the greylist and deletes their player data on quit.
+  mauvelist.admin:
+    description: Allows access to MauveList commands.
