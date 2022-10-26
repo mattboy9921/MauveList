@@ -8,7 +8,7 @@
 
     <groupId>net.mattlabs.mauvelist</groupId>
     <artifactId>MauveList</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
 
     <description>
         Greylist plugin for deleting user data files/adding new members
