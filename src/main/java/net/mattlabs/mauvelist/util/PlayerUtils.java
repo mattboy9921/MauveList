@@ -24,7 +24,7 @@ public class PlayerUtils {
         if (!minecraftUsernameIsValid(name)) throw new NullPointerException("Invalid Minecraft username");
 
         // Check for valid Discord ID
-        User user = mauveList.getJda().getUserById(discordID);
+        User user = mauveList.getJda().retrieveUserById(discordID).complete();
         if (user == null) throw new NullPointerException("Invalid Discord user ID");
         // Link Discord
         DiscordSRV.getPlugin().getAccountLinkManager().link(user.getId(), Bukkit.getPlayerUniqueId(name));
