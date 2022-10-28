@@ -83,7 +83,6 @@ public class MauveList extends JavaPlugin {
         
         // Load Player Manager
         playerManager = new PlayerManager();
-        playerManager.loadPlayerData();
 
         // Register Audience (Messages)
         platform = BukkitAudiences.create(this);
