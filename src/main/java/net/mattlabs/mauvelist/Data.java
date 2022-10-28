@@ -1,10 +1,13 @@
 package net.mattlabs.mauvelist;
 
+import net.mattlabs.mauvelist.util.MauvePlayerData;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @ConfigSerializable
 public class Data {
@@ -32,9 +35,9 @@ public class Data {
             "Config version. Do not change this!")
     private int schemaVersion = 0;
 
-    private ArrayList<String> nonMemberList = new ArrayList<>();
+    private Map<UUID, MauvePlayerData> mauvePlayerMap = new HashMap<>();
 
-    public ArrayList<String> getNonMemberList() {
-        return  nonMemberList;
+    public Map<UUID, MauvePlayerData> getMauvePlayerMap() {
+        return mauvePlayerMap;
     }
 }

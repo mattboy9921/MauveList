@@ -18,6 +18,7 @@ public class JoinListener implements Listener {
 
         Player player = event.getPlayer();
 
+        // Player is a guest, set spectator and tp to spawn
         if (player.hasPermission("mauvelist.grey")) {
             player.setGameMode(GameMode.SPECTATOR);
             player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
@@ -26,7 +27,21 @@ public class JoinListener implements Listener {
                     () -> MauveList.getInstance().getLogger().info(player.getName() + " has logged in as a guest."),
                     20);
 
-            playerManager.addPlayer(player);
+            if (!playerManager.playerExists(player)) playerManager.addPlayer(player);
+        }
+        // Player is a member
+        else {
+            // First join, set to survival, tp to spawn
+            if (playerManager.isNew(player)) {
+                player.setGameMode(GameMode.SURVIVAL);
+                player.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+
+                playerManager.setNew(player, false);
+
+                Bukkit.getScheduler().runTaskLater(MauveList.getInstance(),
+                        () -> MauveList.getInstance().getLogger().info(player.getName() + " has logged in as a member for the first time."),
+                        20);
+            }
         }
     }
 }

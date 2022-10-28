@@ -29,6 +29,8 @@ public class ApplicationManager {
     private final Config config = mauveList.getConfigML();
     private final JDA jda = mauveList.getJda();
     private final Logger logger = mauveList.getLogger();
+
+    private final PlayerManager playerManager = mauveList.getPlayerManager();
     private final Map<User, Application> applications = new HashMap<>();
 
     // Add a new Discord user to the applications map
@@ -177,6 +179,8 @@ public class ApplicationManager {
             application.stopTimeout();
             application.setState(Application.State.SUBMITTED);
 
+            playerManager.addPlayer(Bukkit.getOfflinePlayer(application.getUsername()));
+
             logger.info("Application for " + user.getName() + " has been submitted.");
         }
     }
@@ -254,6 +258,9 @@ public class ApplicationManager {
 
             return;
         }
+
+        // Update player data
+        playerManager.setNew(Bukkit.getOfflinePlayer(application.getUsername()), true);
 
         // Update applications channel
         jda.getTextChannelById(config.getApplicationChannel()).sendMessage(messages.applicationAccepted(user, application.getAnswers().get(0), acceptor)).queue();
