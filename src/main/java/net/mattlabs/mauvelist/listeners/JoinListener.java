@@ -17,6 +17,7 @@ public class JoinListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
 
         Player player = event.getPlayer();
+        if (!playerManager.playerExists(player)) playerManager.addPlayer(player);
 
         // Player is a guest, set spectator and tp to spawn
         if (player.hasPermission("mauvelist.grey")) {
@@ -26,8 +27,6 @@ public class JoinListener implements Listener {
             Bukkit.getScheduler().runTaskLater(MauveList.getInstance(),
                     () -> MauveList.getInstance().getLogger().info(player.getName() + " has logged in as a guest."),
                     20);
-
-            if (!playerManager.playerExists(player)) playerManager.addPlayer(player);
         }
         // Player is a member
         else {
