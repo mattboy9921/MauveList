@@ -54,6 +54,7 @@ public class LeaveListener implements Listener {
                         playerFile.delete();
                     });
                 }
+                if (MauveList.getInstance().getConfigML().isDebug()) MauveList.getInstance().getLogger().info("Player data for " + player.getName() + " was deleted.");
             }
         }
     }

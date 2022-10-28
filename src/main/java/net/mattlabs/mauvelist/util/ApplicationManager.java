@@ -29,7 +29,7 @@ public class ApplicationManager {
     private final Config config = mauveList.getConfigML();
     private final JDA jda = mauveList.getJda();
     private final Logger logger = mauveList.getLogger();
-
+    private final boolean debug = config.isDebug();
     private final PlayerManager playerManager = mauveList.getPlayerManager();
     private final Map<User, Application> applications = new HashMap<>();
 
@@ -39,7 +39,7 @@ public class ApplicationManager {
         if (!hasApplication(user)) {
             // Check if user has linked MC account in members group
             UUID linkedAccountUUID = DiscordSRV.getPlugin().getAccountLinkManager().getUuid(user.getId());
-            if (linkedAccountUUID != null && MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(linkedAccountUUID), config.getMemberGroup())) {
+            if (linkedAccountUUID != null && MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(linkedAccountUUID), config.getMemberGroup()) && !config.isDebug()) {
                 String message = "You are already a member on this server. If you believe this is an error, contact a moderator.";
                 interaction.getHook().sendMessage(message).setEphemeral(true).queue();
             }
@@ -67,6 +67,7 @@ public class ApplicationManager {
 
     public void update(User user, String response) {
         applications.get(user).restartTimeout();
+        if (debug) logger.info("Application for " + user.getName() + " is now in state: " + applications.get(user).getState().name());
         switch (applications.get(user).getState()) {
             case NOT_STARTED:
                 start(user);
@@ -101,11 +102,13 @@ public class ApplicationManager {
     // Called for username validation
     private void username(User user, String username) {
         Application application = applications.get(user);
+        if (debug) logger.info(user.getName() + " has answered username with: " + username);
 
         // Username validation
         if (PlayerUtils.minecraftUsernameIsValid(username)) {
+            if (debug) logger.info(username + " is a valid username");
             // Check if Minecraft username already in members group
-            if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(username), config.getMemberGroup())) {
+            if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(username), config.getMemberGroup()) || debug) {
                 // Send skin check
                 user.openPrivateChannel().complete().sendMessage(messages.applicationUserSkin(username)).queue(application::setSkinMessage);
                 application.setUsername(username);
@@ -121,6 +124,7 @@ public class ApplicationManager {
             String message = "The minecraft username you have provided is invalid and/or does not exist. Please type out only your username exactly as it shows in game.";
             user.openPrivateChannel().complete().sendMessage(messages.applicationError(message)).queue();
             user.openPrivateChannel().complete().sendMessage(messages.applicationUserQuestion(config.getQuestions().get(0))).queue();
+            if (debug) logger.info(username + " is not a valid username");
         }
     }
 
@@ -159,6 +163,8 @@ public class ApplicationManager {
     // Called when the user sends a response to the last question, sends next question
     private void question(User user, String answer) {
         Application application = applications.get(user);
+
+        if (debug) logger.info(user.getName() + " answered question \"" + config.getQuestions().get(application.getQuestionStep()) + "\" with response: " + answer);
 
         application.getAnswers().add(answer);
         application.incrementQuestionStep();

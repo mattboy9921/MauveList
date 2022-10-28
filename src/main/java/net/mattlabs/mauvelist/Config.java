@@ -33,6 +33,13 @@ public class Config {
             "Config version. Do not change this!")
     private int schemaVersion = 0;
 
+    @Comment("\nEnable debugging for the plugin. Removes application restrictions for testing.")
+    private boolean debug = false;
+
+    public boolean isDebug() {
+        return debug;
+    }
+
     @Comment("\nEnable Discord support for the plugin")
     private boolean enableDiscord = false;
 

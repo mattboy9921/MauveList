@@ -8,8 +8,12 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.util.ApplicationManager;
 
+import java.util.logging.Logger;
+
 public class JDAListener extends ListenerAdapter {
 
+    private final boolean debug = MauveList.getInstance().getConfigML().isDebug();
+    private final Logger logger = MauveList.getInstance().getLogger();
     private ApplicationManager applicationManager = MauveList.getInstance().getApplicationManager();
 
     @Override
@@ -45,6 +49,7 @@ public class JDAListener extends ListenerAdapter {
             String[] parts = event.getButton().getId().split(":");
             applicationManager.reject(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getUser(), null);
         }
+        if (debug) logger.info(event.getUser().getName() + " pressed button with ID: " + event.getButton().getId());
     }
 
     @Override
@@ -57,5 +62,6 @@ public class JDAListener extends ListenerAdapter {
                 applicationManager.reject(event.getAuthor(), event.getMessage().getContentDisplay());
             }
         }
+        if (debug) logger.info("Bot received a message from " + event.getAuthor().getName() + " with content: " + event.getMessage().getContentDisplay());
     }
 }
