@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class JoinListener implements Listener {
 
-    private PlayerManager playerManager = MauveList.getInstance().getPlayerManager();
+    private final PlayerManager playerManager = MauveList.getInstance().getPlayerManager();
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {

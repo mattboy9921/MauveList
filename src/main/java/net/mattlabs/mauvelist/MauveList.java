@@ -64,7 +64,7 @@ public class MauveList extends JavaPlugin {
         }
 
         // Configuration Section
-        configurateManager = new ConfigurateManager();
+        configurateManager = new ConfigurateManager(this);
 
         configurateManager.add("config.conf", TypeToken.get(Config.class), new Config(), Config::new);
         configurateManager.add("data.conf", TypeToken.get(Data.class), new Data(), Data::new);
@@ -97,6 +97,16 @@ public class MauveList extends JavaPlugin {
             } catch (LoginException e) {
                 e.printStackTrace();
                 this.setEnabled(false);
+            }
+
+            // Check config
+            if (jda.getTextChannelById(config.getApplicationChannel()) == null) {
+                getLogger().severe("Application channel invalid, check config!");
+                Bukkit.getPluginManager().disablePlugin(this);
+            }
+            if (jda.getTextChannelById(config.getApplyChannel()) == null) {
+                getLogger().severe("Apply channel invalid, check config!");
+                Bukkit.getPluginManager().disablePlugin(this);
             }
 
             // Create ApplicationManager
@@ -184,7 +194,7 @@ public class MauveList extends JavaPlugin {
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp != null) {
             permission = rsp.getProvider();
-            return permission != null;
+            return true;
         }
         else return false;
     }

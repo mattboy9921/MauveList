@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("FieldMayBeFinal")
 @ConfigSerializable
 public class Data {
 

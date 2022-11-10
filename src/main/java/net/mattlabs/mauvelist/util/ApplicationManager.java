@@ -161,6 +161,7 @@ public class ApplicationManager {
     }
 
     // Called when the user sends a response to the last question, sends next question
+    @SuppressWarnings("ConstantConditions") // Channels verified on enable
     private void question(User user, String answer) {
         Application application = applications.get(user);
 
@@ -180,7 +181,7 @@ public class ApplicationManager {
             // Send application
             jda.getTextChannelById(config.getApplicationChannel())
                     .sendMessage(messages.application(user, application.getAnswers()))
-                    .queue((message) -> application.setApplicationMessage(message));
+                    .queue(application::setApplicationMessage);
 
             application.stopTimeout();
             application.setState(Application.State.SUBMITTED);
@@ -242,6 +243,7 @@ public class ApplicationManager {
     }
 
     // Called when a moderator clicks "Accept" on an application
+    @SuppressWarnings("ConstantConditions") // Channels verified on enable
     public void accept(User user, User acceptor) {
         Application application = applications.get(user);
 
@@ -292,7 +294,6 @@ public class ApplicationManager {
                     Button.danger("disabled", "Rejected").asDisabled())).queue();
 
             // Update application
-            application.setWaitingForReason(true);
             application.setRejector(rejector);
             application.startTimeout();
             application.setState(Application.State.UNDER_REVIEW);
@@ -314,6 +315,7 @@ public class ApplicationManager {
         reject(user, rejector, reason);
     }
 
+    @SuppressWarnings("ConstantConditions") // Channels verified on enable
     public void reject(User user, User rejector, String reason) {
         Application application = applications.get(user);
 
@@ -354,11 +356,10 @@ public class ApplicationManager {
 
     private static class Application {
         private State state = State.NOT_STARTED;
-        private User user = null;
+        private final User user;
         private String username = null;
         private int questionStep = 0;
-        private ArrayList<String> answers = new ArrayList<>();
-        private boolean waitingForReason = false;
+        private final ArrayList<String> answers = new ArrayList<>();
         private User rejector = null;
         private Message introMessage = null;
         private Message skinMessage = null;
@@ -394,20 +395,8 @@ public class ApplicationManager {
             questionStep++;
         }
 
-        public void decrementQuestionStep() {
-            questionStep--;
-        }
-
         public ArrayList<String> getAnswers() {
             return answers;
-        }
-
-        public boolean isWaitingForReason() {
-            return waitingForReason;
-        }
-
-        public void setWaitingForReason(boolean waitingForReason) {
-            this.waitingForReason = waitingForReason;
         }
 
         public User getRejector() {

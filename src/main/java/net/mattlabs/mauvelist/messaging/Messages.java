@@ -7,47 +7,27 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Button;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.mattlabs.mauvelist.MauveList;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
+import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
 
 public class Messages {
 
     private final MauveList mauveList = MauveList.getInstance();
 
+    @SuppressWarnings("ConstantConditions") // Description is hard coded
     public Component version() {
         return Component.text()
                 .append(Component.text("[", GRAY))
                 .append(Component.text("MauveList", TextColor.fromHexString("#5B4253")))
                 .append(Component.text("] ", GRAY))
                 .append(Component.text("Version: " + Bukkit.getPluginManager().getPlugin("MauveList").getDescription().getVersion(), WHITE))
-                .build();
-    }
-
-    public Component lastTenGuestsHeading() {
-        return Component.text()
-                .append(Component.text("[", GRAY))
-                .append(Component.text("MauveList", TextColor.fromHexString("#5B4253")))
-                .append(Component.text("] ", GRAY))
-                .append(Component.text("Last 10 guests:", WHITE))
-                .build();
-    }
-
-    public Component lastTenGuestsListing(String name, String uuid, String lastJoin) {
-        return Component.text()
-                .append(Component.text(" - ", TextColor.fromHexString("#E0B0FF")))
-                .append(Component.text(name + " ", WHITE, BOLD)
-                        .hoverEvent(HoverEvent.showText(Component.text().append(Component.text("Last seen: " + lastJoin + "\n" + uuid)))))
-                .append(Component.text("[Accept]", BLUE, BOLD)
-                        .hoverEvent(HoverEvent.showText(Component.text("Click here to add " + name + " as a member.")))
-                        .clickEvent(ClickEvent.runCommand("/ml add " + name)))
                 .build();
     }
 
@@ -70,6 +50,7 @@ public class Messages {
                 .build();
     }
 
+    @SuppressWarnings("unused")
     public Component reloaded() {
         return Component.text()
                 .append(Component.text("[", GRAY))

@@ -14,40 +14,44 @@ public class JDAListener extends ListenerAdapter {
 
     private final boolean debug = MauveList.getInstance().getConfigML().isDebug();
     private final Logger logger = MauveList.getInstance().getLogger();
-    private ApplicationManager applicationManager = MauveList.getInstance().getApplicationManager();
+    private final ApplicationManager applicationManager = MauveList.getInstance().getApplicationManager();
 
     @Override
     public void onButtonClick(ButtonClickEvent event) {
-        if (event.getButton().getId().equals("apply")) {
-            event.deferEdit().queue();
-            applicationManager.create(event.getUser(), event.getInteraction());
-        }
-        else if (event.getButton().getId().equals("applicationStart")) {
-            event.deferEdit().queue();
-            applicationManager.update(event.getUser());
-        }
-        else if (event.getButton().getId().contains("acceptSkin")) {
-            event.deferEdit().queue();
-            applicationManager.update(event.getUser(), event.getUser().getId());
-        }
-        else if (event.getButton().getId().contains("rejectSkin")) {
-            event.deferEdit().queue();
-            applicationManager.update(event.getUser(), null);
-        }
-        else if (event.getButton().getId().contains("applicationAccept")) {
-            event.deferEdit().queue();
-            String[] parts = event.getButton().getId().split(":");
-            applicationManager.accept(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getUser());
-        }
-        else if (event.getButton().getId().contains("applicationReject")) {
-            event.deferEdit().queue();
-            String[] parts = event.getButton().getId().split(":");
-            applicationManager.review(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getUser());
-        }
-        else if (event.getButton().getId().contains("rejectNoReason")) {
-            event.deferEdit().queue();
-            String[] parts = event.getButton().getId().split(":");
-            applicationManager.reject(MauveList.getInstance().getJda().retrieveUserById(parts[1]).complete(), event.getUser(), null);
+        if (event.getButton() != null && event.getButton().getId() != null) {
+            switch (event.getButton().getId()) {
+                case "apply":
+                    event.deferEdit().queue();
+                    applicationManager.create(event.getUser(), event.getInteraction());
+                    break;
+                case "applicationStart":
+                    event.deferEdit().queue();
+                    applicationManager.update(event.getUser());
+                    break;
+                case "acceptSkin":
+                    event.deferEdit().queue();
+                    applicationManager.update(event.getUser(), event.getUser().getId());
+                    break;
+                case "rejectSkin":
+                    event.deferEdit().queue();
+                    applicationManager.update(event.getUser(), null);
+                    break;
+                case "applicationAccept":
+                    event.deferEdit().queue();
+                    String[] accParts = event.getButton().getId().split(":");
+                    applicationManager.accept(MauveList.getInstance().getJda().retrieveUserById(accParts[1]).complete(), event.getUser());
+                    break;
+                case "applicationReject":
+                    event.deferEdit().queue();
+                    String[] rejParts = event.getButton().getId().split(":");
+                    applicationManager.review(MauveList.getInstance().getJda().retrieveUserById(rejParts[1]).complete(), event.getUser());
+                    break;
+                case "rejectNoReason":
+                    event.deferEdit().queue();
+                    String[] reaParts = event.getButton().getId().split(":");
+                    applicationManager.reject(MauveList.getInstance().getJda().retrieveUserById(reaParts[1]).complete(), event.getUser(), null);
+                    break;
+            }
         }
         if (debug) logger.info(event.getUser().getName() + " pressed button with ID: " + event.getButton().getId());
     }

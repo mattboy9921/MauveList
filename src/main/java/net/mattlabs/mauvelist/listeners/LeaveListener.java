@@ -16,6 +16,7 @@ public class LeaveListener implements Listener {
     private File playerData = null, essentialsPlayerData = null;
 
     // Player quits
+    @SuppressWarnings("deprecation") // Paper API
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event) {
         if (event.getReason().equals("Rejoin in 30 seconds, you are now a member!"))
@@ -29,7 +30,9 @@ public class LeaveListener implements Listener {
     }
 
     // Delete the player's data file and Essentails data file if enabled
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void deletePlayerData(Player player) {
+        boolean error = false;
         if (MauveList.getInstance().getConfigML().isDeletePlayerData()) {
             if (player.hasPermission("mauvelist.grey")) {
                 // Player data file
@@ -37,7 +40,12 @@ public class LeaveListener implements Listener {
                     String worldName = MauveList.getInstance().getWorldName();
                     World world = Bukkit.getServer().getWorld(worldName);
 
-                    playerData = new File(world.getWorldFolder(), "playerdata");
+                    if (world != null) {
+                        playerData = new File(world.getWorldFolder(), "playerdata");
+                    }
+                    else {
+                        error = true;
+                    }
                 }
                 Bukkit.getScheduler().runTaskAsynchronously(MauveList.getInstance(), () -> {
                     File playerFile = new File(playerData, player.getUniqueId() + ".dat");
@@ -54,7 +62,8 @@ public class LeaveListener implements Listener {
                         playerFile.delete();
                     });
                 }
-                if (MauveList.getInstance().getConfigML().isDebug()) MauveList.getInstance().getLogger().info("Player data for " + player.getName() + " was deleted.");
+                if (MauveList.getInstance().getConfigML().isDebug() && !error) MauveList.getInstance().getLogger().info("Player data for " + player.getName() + " was deleted.");
+                else MauveList.getInstance().getLogger().severe("Player data for " + player.getName() + " could not be deleted!");
             }
         }
     }

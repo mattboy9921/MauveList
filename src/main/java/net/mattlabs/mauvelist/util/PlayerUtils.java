@@ -6,6 +6,7 @@ import net.mattlabs.mauvelist.MauveList;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -17,6 +18,7 @@ public class PlayerUtils {
     private static final Permission permission = MauveList.getPermission();
 
     // Adds a player to the members group
+    @SuppressWarnings("deprecation") // Paper API
     public static void addPlayer(String name, String discordID) throws NullPointerException, NumberFormatException {
         OfflinePlayer player = Bukkit.getOfflinePlayer(name);
 
@@ -44,7 +46,8 @@ public class PlayerUtils {
             else {
                 mauveList.getLogger().info(name + " is now a member!");
                 if (player.isOnline()) MauveList.getInstance().getServer().getScheduler().runTask(MauveList.getInstance(), () -> {
-                    Bukkit.getPlayer(name).kickPlayer("Rejoin in 30 seconds, you are now a member!");
+                    Player kickPlayer = Bukkit.getPlayer(name);
+                    if (kickPlayer != null) kickPlayer.kickPlayer("Rejoin in 30 seconds, you are now a member!");
                 });
             }
         });
