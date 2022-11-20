@@ -29,7 +29,8 @@ public class PlayerUtils {
         User user = mauveList.getJda().retrieveUserById(discordID).complete();
         if (user == null) throw new NullPointerException("Invalid Discord user ID");
         // Link Discord
-        DiscordSRV.getPlugin().getAccountLinkManager().link(user.getId(), Bukkit.getPlayerUniqueId(name));
+        Bukkit.getScheduler().runTaskAsynchronously(mauveList, () ->
+                DiscordSRV.getPlugin().getAccountLinkManager().link(user.getId(), Bukkit.getPlayerUniqueId(name)));
 
         mauveList.getServer().getScheduler().runTaskAsynchronously(mauveList, () -> {
             if (mauveList.getConfigML().getPermissionType().equalsIgnoreCase("set")) {
