@@ -79,6 +79,7 @@ public class ConfigurateManager {
         }
         catch (IOException e) {
             MauveList.getInstance().getLogger().severe("Failed to load \"" + fileName + "\" - using a default!");
+            e.printStackTrace();
         }
         return t;
     }

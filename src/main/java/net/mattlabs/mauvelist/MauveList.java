@@ -20,7 +20,6 @@ import org.bukkit.World;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
@@ -94,7 +93,7 @@ public class MauveList extends JavaPlugin {
             // Set Up JDA
             try {
                 jda = JDABuilder.createDefault(config.getBotToken()).setStatus(getOnlineStatusFromString(config.getBotStatus())).build();
-            } catch (LoginException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 this.setEnabled(false);
             }

@@ -3,9 +3,9 @@ package net.mattlabs.mauvelist.commands;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.util.PlayerManager;
 import net.mattlabs.mauvelist.util.PlayerUtils;
@@ -46,12 +46,12 @@ public class MauveListCommand extends BaseCommand {
     @Description("Sends the application message to the relavent channel.")
     public void onApplyButton() {
         if (mauveList.getConfigML().isEnableDiscord()) {
-            MessageBuilder builder = new MessageBuilder();
+            MessageCreateBuilder builder = new MessageCreateBuilder();
             builder.setEmbeds(new EmbedBuilder().setTitle(mauveList.getConfigML().getApplyTitle())
                     .setDescription(mauveList.getConfigML().getApplyBody())
                     .setColor(2664261)
                     .build());
-            builder.setActionRows(ActionRow.of(Button.success("apply", "Apply")));
+            builder.setComponents(ActionRow.of(Button.success("apply", "Apply")));
             mauveList.getJda().getTextChannelById(mauveList.getConfigML().getApplyChannel()).sendMessage(builder.build()).queue();
             mauveList.getLogger().info("Apply message has been sent.");
         }

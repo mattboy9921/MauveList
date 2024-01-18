@@ -5,9 +5,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.interactions.Interaction;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import net.mattlabs.mauvelist.Config;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.messaging.Messages;
@@ -34,7 +34,7 @@ public class ApplicationManager {
     private final Map<User, Application> applications = new HashMap<>();
 
     // Add a new Discord user to the applications map
-    public void create(User user, Interaction interaction) {
+    public void create(User user, ButtonInteraction interaction) {
         // Check if user has application
         if (!hasApplication(user)) {
             // Check if user has linked MC account in members group

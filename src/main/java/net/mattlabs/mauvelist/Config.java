@@ -117,7 +117,7 @@ public class Config {
     }
 
     @Comment("\nThe application questions (\"What is your Minecraft username?\" is asked by default and does not need to be added here)")
-    private ArrayList<String> questions = new ArrayList(Arrays.asList("Question one?", "Question two?", "Question three?"));
+    private ArrayList<String> questions = new ArrayList<>(Arrays.asList("Question one?", "Question two?", "Question three?"));
 
     public ArrayList<String> getQuestions() {
         ArrayList<String> allQuestions = new ArrayList<>(questions);

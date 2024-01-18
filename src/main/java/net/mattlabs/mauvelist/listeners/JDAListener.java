@@ -1,8 +1,8 @@
 package net.mattlabs.mauvelist.listeners;
 
 
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.mattlabs.mauvelist.MauveList;
@@ -13,7 +13,7 @@ public class JDAListener extends ListenerAdapter {
     private ApplicationManager applicationManager = MauveList.getInstance().getApplicationManager();
 
     @Override
-    public void onButtonClick(ButtonClickEvent event) {
+    public void onButtonInteraction(ButtonInteractionEvent event) {
         if (event.getButton().getId().equals("apply")) {
             event.deferEdit().queue();
             applicationManager.create(event.getUser(), event.getInteraction());

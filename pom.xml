@@ -8,7 +8,7 @@
 
     <groupId>net.mattlabs.mauvelist</groupId>
     <artifactId>MauveList</artifactId>
-    <version>3.0.3</version>
+    <version>3.0.4</version>
 
     <description>
         Greylist plugin for deleting user data files/adding new members
@@ -76,20 +76,20 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.19-R0.1-SNAPSHOT</version>
+            <version>1.20.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- For ACF -->
         <dependency>
             <groupId>co.aikar</groupId>
             <artifactId>acf-paper</artifactId>
-            <version>0.5.0-SNAPSHOT</version>
+            <version>0.5.1-SNAPSHOT</version>
         </dependency>
         <!-- For Vault -->
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
+            <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
         <!-- For Configurate -->
@@ -102,30 +102,30 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.11.0</version>
+            <version>4.15.0</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.1.2</version>
+            <version>4.3.2</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.11.0</version>
+            <version>4.15.0</version>
         </dependency>
         <!-- For DiscordSRV -->
         <dependency>
             <groupId>com.discordsrv</groupId>
             <artifactId>discordsrv</artifactId>
-            <version>1.25.0</version>
+            <version>1.27.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- For JDA -->
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-alpha.2</version>
+            <version>5.0.0-beta.19</version>
         </dependency>
     </dependencies>
 
@@ -163,10 +163,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>17</source>
+                    <target>17</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
@@ -183,7 +183,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.5.0</version>
 
                 <configuration>
                     <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
@@ -196,6 +196,11 @@
                         <relocation>
                             <pattern>co.aikar.locales</pattern>
                             <shadedPattern>net.mattlabs.mauvelist.locales</shadedPattern>
+                        </relocation>
+                        <!-- Configurate -->
+                        <relocation>
+                            <pattern>org.spongepowered.configurate</pattern>
+                            <shadedPattern>net.mattlabs.mauvelist.configurate</shadedPattern>
                         </relocation>
                         <!-- ConfigManager -->
                         <relocation>
@@ -259,7 +264,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.8</version>
+                        <version>3.1.0</version>
                         <executions>
                             <execution>
                                 <id>copy</id>
