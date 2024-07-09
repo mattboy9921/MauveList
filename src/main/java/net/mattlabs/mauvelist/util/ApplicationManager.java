@@ -49,6 +49,7 @@ public class ApplicationManager {
                 applications.put(user, new Application(user));
                 applications.get(user).startTimeout();
                 // Message user to start application
+                // TODO add detection for blocked/closed DMs
                 user.openPrivateChannel().complete().sendMessage(messages.applicationUserIntro()).queue(
                         (message) -> applications.get(user).setIntroMessage(message));
 
@@ -105,7 +106,7 @@ public class ApplicationManager {
         // Username validation
         if (PlayerUtils.minecraftUsernameIsValid(username)) {
             // Check if Minecraft username already in members group
-            if (!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(username), config.getMemberGroup())) {
+            if (/*!MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(username), config.getMemberGroup())*/true) {
                 // Send skin check
                 user.openPrivateChannel().complete().sendMessage(messages.applicationUserSkin(username)).queue(application::setSkinMessage);
                 application.setUsername(username);

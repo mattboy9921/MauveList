@@ -103,7 +103,7 @@ public class Messages {
         MessageCreateBuilder builder = new MessageCreateBuilder();
         builder.setEmbeds(new EmbedBuilder().setTitle("Your Minecraft username is: `" + username + "`")
                 .setDescription("Is the skin below your Minecraft skin?")
-                .setImage("https://crafatar.com/renders/body/" + Bukkit.getOfflinePlayer(username).getUniqueId() + "?overlay")
+                .setImage("https://minotar.net/armor/body/" + Bukkit.getOfflinePlayer(username).getUniqueId() + "/100.png")
                 .setFooter("Please choose an option below.")
                 .setColor(161240)
                 .build());
@@ -146,7 +146,7 @@ public class Messages {
 
         builder.setEmbeds(new EmbedBuilder().setAuthor("Applicant: " + user.getName() + " \uD83D\uDCE5", null, user.getAvatarUrl())
                 .setDescription(description)
-                .setThumbnail("https://crafatar.com/renders/body/" + Bukkit.getOfflinePlayer(answers.get(0)).getUniqueId() + "?overlay")
+                .setThumbnail("https://minotar.net/armor/body/" + Bukkit.getOfflinePlayer(answers.get(0)).getUniqueId() + "/100.png")
                 .setColor(161240)
                 .build());
 
