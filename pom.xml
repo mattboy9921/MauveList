@@ -8,7 +8,7 @@
 
     <groupId>net.mattlabs.mauvelist</groupId>
     <artifactId>MauveList</artifactId>
-    <version>3.0.6-beta.1</version>
+    <version>3.0.6-beta.3</version>
 
     <description>
         Greylist plugin for deleting user data files/adding new members
@@ -36,7 +36,7 @@
         <!-- For Paper API -->
         <repository>
             <id>papermc</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <!-- For ACF -->
         <repository>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.20.6-R0.1-SNAPSHOT</version>
+            <version>1.21.8-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- For ACF -->
@@ -96,23 +96,23 @@
         <dependency>
             <groupId>org.spongepowered</groupId>
             <artifactId>configurate-hocon</artifactId>
-            <version>4.1.2</version>
+            <version>4.2.0</version>
         </dependency>
         <!-- For Adventure -->
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.17.0</version>
+            <version>4.24.0</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.3.3-SNAPSHOT</version>
+            <version>4.4.1</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.17.0</version>
+            <version>4.24.0</version>
         </dependency>
         <!-- For DiscordSRV -->
         <dependency>
@@ -191,36 +191,41 @@
                         <!-- ACF -->
                         <relocation>
                             <pattern>co.aikar.commands</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.acf</shadedPattern>
+                            <shadedPattern>net.mattlabs.mauvelist.libs.co.aikar.commands</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>co.aikar.locales</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.locales</shadedPattern>
+                            <shadedPattern>net.mattlabs.mauvelist.libs.co.aikar.locales</shadedPattern>
                         </relocation>
                         <!-- Configurate -->
                         <relocation>
                             <pattern>org.spongepowered.configurate</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.configurate</shadedPattern>
+                            <shadedPattern>net.mattlabs.mauvelist.libs.org.spongepowered.configurate</shadedPattern>
                         </relocation>
                         <!-- ConfigManager -->
                         <relocation>
                             <pattern>net.mattlabs.configmanager</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.configmanager</shadedPattern>
+                            <shadedPattern>net.mattlabs.mauvelist.libs.net.mattlabs.configmanager</shadedPattern>
                         </relocation>
                         <!-- Adventure -->
                         <relocation>
                             <pattern>net.kyori</pattern>
-                            <shadedPattern>net.mattlabs.crewchat</shadedPattern>
+                            <shadedPattern>net.mattlabs.mauvelist.libs.net.kyori</shadedPattern>
                         </relocation>
                         <!-- DiscordSRV -->
                         <relocation>
                             <pattern>com.discordsrv</pattern>
-                            <shadedPattern>net.mattlabs.discordsrv</shadedPattern>
+                            <shadedPattern>net.mattlabs.libs.com.discordsrv</shadedPattern>
                         </relocation>
                         <!-- For JDA -->
                         <relocation>
                             <pattern>net.dv8tion</pattern>
-                            <shadedPattern>net.mattlabs.dv8tion</shadedPattern>
+                            <shadedPattern>net.mattlabs.libs.net.dv8tion</shadedPattern>
+                        </relocation>
+                        <!-- Extra -->
+                        <relocation>
+                            <pattern>com.sun.jna</pattern>
+                            <shadedPattern>net.mattlabs.libs.com.sun.jna</shadedPattern>
                         </relocation>
                     </relocations>
                     <!-- Fix signed dependency JARs -->

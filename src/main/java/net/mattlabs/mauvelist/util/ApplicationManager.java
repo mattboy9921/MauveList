@@ -5,9 +5,13 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.mattlabs.mauvelist.Config;
 import net.mattlabs.mauvelist.MauveList;
 import net.mattlabs.mauvelist.messaging.Messages;
@@ -39,7 +43,7 @@ public class ApplicationManager {
         if (!hasApplication(user)) {
             // Check if user has linked MC account in members group
             UUID linkedAccountUUID = DiscordSRV.getPlugin().getAccountLinkManager().getUuid(user.getId());
-            if (linkedAccountUUID != null && MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(linkedAccountUUID), config.getMemberGroup())) {
+            if ((linkedAccountUUID != null && MauveList.getPermission().playerInGroup(null, Bukkit.getOfflinePlayer(linkedAccountUUID), config.getMemberGroup())) && !config.isDebug()) {
                 String message = "You are already a member on this server. If you believe this is an error, contact a moderator.";
                 interaction.getHook().sendMessage(message).setEphemeral(true).queue();
             }
@@ -274,7 +278,7 @@ public class ApplicationManager {
     }
 
     // Called when a moderator clicks "Reject" on an application, sends mod DM for reason
-    public void review(User user, User rejector) {
+    public void review(User user, User rejector, ButtonInteractionEvent event) {
         // Make sure rejector isn't reviewing another application
         if (!isReviewing(rejector)) {
             Application application = applications.get(user);
@@ -293,7 +297,25 @@ public class ApplicationManager {
             application.setState(Application.State.UNDER_REVIEW);
 
             // Ask rejector for reason
-            rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(user)).queue(application::setReviewMessage);
+            //rejector.openPrivateChannel().complete().sendMessage(messages.applicationRejectReason(user)).queue(application::setReviewMessage);
+
+            TextInput subject = TextInput.create("subject", "Subject", TextInputStyle.SHORT)
+                    .setPlaceholder("Subject of this ticket")
+                    .setMinLength(10)
+                    .setMaxLength(100) // or setRequiredRange(10, 100)
+                    .build();
+
+            TextInput body = TextInput.create("body", "Body", TextInputStyle.PARAGRAPH)
+                    .setPlaceholder("Your concerns go here")
+                    .setMinLength(30)
+                    .setMaxLength(1000)
+                    .build();
+
+            Modal modal = Modal.create("modmail", "Modmail")
+                    .addComponents(ActionRow.of(subject), ActionRow.of(body))
+                    .build();
+
+            event.replyModal(modal).queue();
 
             logger.info("Application for " + user.getName() + " is under review by " + rejector.getName() + ".");
         }
