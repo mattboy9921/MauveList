@@ -1,298 +1,38 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Project metadata -->
-
     <groupId>net.mattlabs.mauvelist</groupId>
-    <artifactId>MauveList</artifactId>
-    <version>3.0.6-beta.3</version>
-
-    <description>
-        Greylist plugin for deleting user data files/adding new members
-    </description>
-
-    <licenses>
-        <license>
-            <name>MIT</name>
-            <url>http://opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <name>mattboy9921</name>
-            <email>mattboy9921@aim.com</email>
-            <url>https://github.com/mattboy9921/</url>
-        </developer>
-    </developers>
-
-    <!-- Project dependencies -->
-
-    <repositories>
-        <!-- For Paper API -->
-        <repository>
-            <id>papermc</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-        <!-- For ACF -->
-        <repository>
-            <id>aikar</id>
-            <url>https://repo.aikar.co/content/groups/aikar/</url>
-        </repository>
-        <!-- For Vault -->
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-        <!-- For Configurate -->
-        <repository>
-            <id>sponge</id>
-            <url>https://repo.spongepowered.org/maven</url>
-        </repository>
-        <!-- For Adventure -->
-        <repository>
-            <id>sonatype-oss-snapshots1</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
-        <!-- For DiscordSRV -->
-        <repository>
-            <id>Scarsz-Nexus</id>
-            <url>https://nexus.scarsz.me/content/groups/public/</url>
-        </repository>
-        <!-- For JDA -->
-        <repository>
-            <id>dv8tion</id>
-            <name>m2-dv8tion</name>
-            <url>https://m2.dv8tion.net/releases</url>
-        </repository>
-    </repositories>
-
-    <dependencies>
-        <!-- For Paper API -->
-        <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.21.8-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- For ACF -->
-        <dependency>
-            <groupId>co.aikar</groupId>
-            <artifactId>acf-paper</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
-        </dependency>
-        <!-- For Vault -->
-        <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- For Configurate -->
-        <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>configurate-hocon</artifactId>
-            <version>4.2.0</version>
-        </dependency>
-        <!-- For Adventure -->
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-api</artifactId>
-            <version>4.24.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-text-minimessage</artifactId>
-            <version>4.24.0</version>
-        </dependency>
-        <!-- For DiscordSRV -->
-        <dependency>
-            <groupId>com.discordsrv</groupId>
-            <artifactId>discordsrv</artifactId>
-            <version>1.27.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- For JDA -->
-        <dependency>
-            <groupId>net.dv8tion</groupId>
-            <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.24</version>
-        </dependency>
-    </dependencies>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <url>https://repo.mattlabs.net/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>nexus-releases</id>
-            <url>https://repo.mattlabs.net/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
-
-    <!-- Project settings -->
+    <artifactId>mauvelist-root</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
 
     <properties>
-        <!-- Enforce Unicode when compiling Java -->
+        <revision>4.0.0</revision>
+        <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Minecraft Version -->
-        <mcver>1.13</mcver>
     </properties>
 
+    <modules>
+        <!-- Folder name, not artifactId -->
+        <module>api</module>
+        <module>discord</module>
+        <module>plugin</module>
+        <module>current</module>
+    </modules>
+
     <build>
-        <!-- Replaces tokens like "${project.version}" in plugin.yml -->
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-
-        <plugins>
-            <!-- Specifies minimum Java version and Unicode for compile and runtime -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-
-            <!-- Ensure resource files are processed as Unicode -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.0</version>
-
-                <configuration>
-                    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
-                    <relocations>
-                        <!-- ACF -->
-                        <relocation>
-                            <pattern>co.aikar.commands</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.libs.co.aikar.commands</shadedPattern>
-                        </relocation>
-                        <relocation>
-                            <pattern>co.aikar.locales</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.libs.co.aikar.locales</shadedPattern>
-                        </relocation>
-                        <!-- Configurate -->
-                        <relocation>
-                            <pattern>org.spongepowered.configurate</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.libs.org.spongepowered.configurate</shadedPattern>
-                        </relocation>
-                        <!-- ConfigManager -->
-                        <relocation>
-                            <pattern>net.mattlabs.configmanager</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.libs.net.mattlabs.configmanager</shadedPattern>
-                        </relocation>
-                        <!-- Adventure -->
-                        <relocation>
-                            <pattern>net.kyori</pattern>
-                            <shadedPattern>net.mattlabs.mauvelist.libs.net.kyori</shadedPattern>
-                        </relocation>
-                        <!-- DiscordSRV -->
-                        <relocation>
-                            <pattern>com.discordsrv</pattern>
-                            <shadedPattern>net.mattlabs.libs.com.discordsrv</shadedPattern>
-                        </relocation>
-                        <!-- For JDA -->
-                        <relocation>
-                            <pattern>net.dv8tion</pattern>
-                            <shadedPattern>net.mattlabs.libs.net.dv8tion</shadedPattern>
-                        </relocation>
-                        <!-- Extra -->
-                        <relocation>
-                            <pattern>com.sun.jna</pattern>
-                            <shadedPattern>net.mattlabs.libs.com.sun.jna</shadedPattern>
-                        </relocation>
-                    </relocations>
-                    <!-- Fix signed dependency JARs -->
-                    <filters>
-                        <filter>
-                            <artifact>*:*:*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.RSA</exclude>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.MF</exclude>
-                                <exclude>META-INF/versions/16/</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                    <transformers>
-                        <!-- For JDA -->
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>net.mattlabs.mauvelist.MauveList</mainClass>
-                        </transformer>
-                    </transformers>
-                </configuration>
-
-                <!-- Perform shading for package phase -->
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
-    <profiles>
-        <!-- Profile to copy JAR to test server -->
-        <profile>
-            <id>testServer</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>copy</id>
-                                <phase>package</phase>
-                                <configuration>
-                                <target>
-                                    <delete>
-                                        <fileset dir="${basedir}\..\..\Test Server\${mcver}\plugins" includes="${project.artifactId}-*.jar" />
-                                    </delete>
-                                    <echo>Copying ${project.artifactId}-${project.version}.jar to test server...</echo>
-                                    <copy todir="${basedir}\..\..\Test Server\${mcver}\plugins" overwrite="true" flatten="true">
-                                        <fileset dir="${basedir}/target" includes="${project.artifactId}-${project.version}.jar" />
-                                    </copy>
-                                </target>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+
 </project>
