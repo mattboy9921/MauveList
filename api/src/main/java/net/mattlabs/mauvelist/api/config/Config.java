@@ -25,4 +25,49 @@ public class Config {
             By Mattboy9921
             https://github.com/mattboy9921/MauveList""")
     private boolean _mattIsAwesome = true;
+
+    @ConfigSerializable
+    public static class Database {
+        @Comment("\nThe hostname or IP address of the MariaDB server.")
+        private String hostname = "localhost";
+
+        public String getHostname() {
+            return hostname;
+        }
+
+        @Comment("\nThe port for the MariaDB server.")
+        private int port = 3306;
+
+        public int getPort() {
+            return port;
+        }
+
+        @Comment("\nThe database to use on the MariaDB server.")
+        private String database = "mauvelist";
+
+        public String getDatabase() {
+            return database;
+        }
+
+        @Comment("\nThe username for the MariaDB server.")
+        private String username = "mauvelist";
+
+        public String getUsername() {
+            return username;
+        }
+
+        @Comment("\nThe password for the MariaDB username.")
+        private String password = "mauvelist";
+
+        public String getPassword() {
+            return password;
+        }
+    }
+
+    @Comment("\n** Database Configuration Settings **")
+    private Database database = new Database();
+
+    public Database getDatabase() {
+        return database;
+    }
 }
