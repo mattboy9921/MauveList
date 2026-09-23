@@ -1,6 +1,7 @@
 package net.mattlabs.mauvelist.api;
 
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.output.MigrateResult;
 import org.mariadb.jdbc.MariaDbPoolDataSource;
 
 import java.sql.Connection;
@@ -25,9 +26,11 @@ public class DatabaseManager {
         dataSource.close();
     }
 
-    public void migrate() {
+    public boolean migrate() {
         Flyway flyway = Flyway.configure().dataSource(dataSource).load();
 
-        flyway.migrate();
+        MigrateResult result = flyway.migrate();
+
+        return result.success;
     }
 }
