@@ -8,11 +8,10 @@ import net.mattlabs.mauvelist.api.logging.ConsoleOutputHandler;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MauveListAPI {
@@ -26,9 +25,16 @@ public class MauveListAPI {
 
     public MauveListAPI() {
         // Logging with custom handler
+        Logger rootLogger = Logger.getLogger("");
+
+        for (Handler handler : rootLogger.getHandlers()) {
+            rootLogger.removeHandler(handler);
+        }
+
+        rootLogger.addHandler(new ConsoleOutputHandler());
+        rootLogger.setLevel(Level.INFO);
+
         this.logger = Logger.getLogger(MauveListAPI.class.getName());
-        logger.setUseParentHandlers(false);
-        logger.addHandler(new ConsoleOutputHandler());
 
         this.dataFolder = Path.of("MauveListAPI");
     }
@@ -44,6 +50,8 @@ public class MauveListAPI {
     }
 
     public void start() {
+        logger.info("Starting MauveListAPI...");
+
         // Configurate Section
 
         config = null;
@@ -77,6 +85,7 @@ public class MauveListAPI {
             databaseManager = new DatabaseManager(
                     databaseConfig.getHostname(),
                     databaseConfig.getPort(),
+                    databaseConfig.getDatabase(),
                     databaseConfig.getUsername(),
                     databaseConfig.getPassword()
             );
@@ -84,19 +93,10 @@ public class MauveListAPI {
         } catch (SQLException e) {
             logger.severe("Initializing database manager failed with message: " + e.getMessage());
         }
-
-        // Test Query
-        logger.info("Running test query...");
-        try {
-            Connection connection = databaseManager.getConnection();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT 'Hello World!'");
-            resultSet.first();
-            logger.info("Database query result: " + resultSet.getString(1));
-        }
-        catch (SQLException e) {
-            logger.severe("SQL error: " + e.getMessage());
-        }
+        // Migrations
+        logger.info("Checking schema version...");
+        databaseManager.migrate();
+        logger.info("Database up to date!");
 
         logger.info("MauveList API Started!");
     }
