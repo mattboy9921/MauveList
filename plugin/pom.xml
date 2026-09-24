@@ -9,6 +9,160 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>plugin</artifactId>
+    <artifactId>MauveList</artifactId>
+    <packaging>jar</packaging>
+
+    <description>
+        Greylist plugin working with MauveList system to manage members and guests
+    </description>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>mattboy9921</name>
+            <email>mattboy9921@aim.com</email>
+            <url>https://github.com/mattboy9921/</url>
+        </developer>
+    </developers>
+
+    <!-- Project dependencies -->
+
+    <repositories>
+        <!-- For Paper API -->
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <!-- For Configurate -->
+        <repository>
+            <id>sponge</id>
+            <url>https://repo.spongepowered.org/maven</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- For Paper API -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>[26.2.build,)</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- For Configurate -->
+        <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-hocon</artifactId>
+            <version>4.2.0</version>
+        </dependency>
+    </dependencies>
+
+    <!-- Project settings -->
+
+    <properties>
+        <!-- Minecraft version for test server profile -->
+        <mcver>1.13</mcver>
+    </properties>
+
+    <build>
+        <!-- Replaces tokens like "${project.version}" in plugin.yml -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <!-- Ensure resource files are processed as Unicode -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.2</version>
+
+                <configuration>
+                    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+                    <relocations>
+                        <!-- Configurate -->
+                        <relocation>
+                            <pattern>org.spongepowered.configurate</pattern>
+                            <shadedPattern>net.mattlabs.mauvelist.libs.org.spongepowered.configurate</shadedPattern>
+                        </relocation>
+                    </relocations>
+                    <!-- Fix signed dependency JARs -->
+                    <filters>
+                        <filter>
+                            <artifact>*:*:*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.RSA</exclude>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.MF</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
+
+                <!-- Perform shading for package phase -->
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Profile to copy JAR to test server -->
+        <profile>
+            <id>testServer</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <target>
+                                        <delete>
+                                            <fileset dir="${basedir}\..\..\..\Test Server\${mcver}\plugins" includes="${project.artifactId}-*.jar" />
+                                        </delete>
+                                        <echo>Copying ${project.artifactId}-${project.version}.jar to test server...</echo>
+                                        <copy todir="${basedir}\..\..\..\Test Server\${mcver}\plugins" overwrite="true" flatten="true">
+                                            <fileset dir="${basedir}/target" includes="${project.artifactId}-${project.version}.jar" />
+                                        </copy>
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

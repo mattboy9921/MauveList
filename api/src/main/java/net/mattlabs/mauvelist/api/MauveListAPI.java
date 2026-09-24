@@ -47,7 +47,7 @@ public class MauveListAPI {
         initializeDatabase();
         initializeCommunication();
 
-        logger.info("MauveList API Started!");
+        logger.info("MauveList API started!");
     }
 
     public void stop() {

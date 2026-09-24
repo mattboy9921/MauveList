@@ -12,6 +12,16 @@
 
     <artifactId>api</artifactId>
 
+    <!-- Project dependencies -->
+
+    <repositories>
+        <!-- For Configurate -->
+        <repository>
+            <id>sponge</id>
+            <url>https://repo.spongepowered.org/maven</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- For Configurate -->
         <dependency>

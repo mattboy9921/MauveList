@@ -12,6 +12,7 @@
     <properties>
         <revision>4.0.0</revision>
         <maven.compiler.release>25</maven.compiler.release>
+        <!-- Enforce Unicode when compiling Java -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -29,7 +30,11 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>3.16.0</version>
+                    <configuration>
+                        <!-- Specifies minimum Java version and Unicode for compile and runtime -->
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
