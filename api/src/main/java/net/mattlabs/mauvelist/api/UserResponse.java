@@ -8,6 +8,7 @@ public record UserResponse(
         String minecraftUsername,
         Long discordUserId,
         Instant createdAt,
+        Instant lastSeenAt,
         boolean preexisting
 ) {
 }

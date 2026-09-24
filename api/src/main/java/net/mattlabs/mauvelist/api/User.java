@@ -9,13 +9,15 @@ public class User {
     private String minecraftUsername;
     private long discordUserID;
     private final Instant createdAt;
+    private Instant lastSeenAt;
     private final boolean preexisting;
 
-    public User(UUID minecraftUUID, String minecraftUsername, long discordUserID, Instant createdAt, boolean preexisting) {
+    public User(UUID minecraftUUID, String minecraftUsername, long discordUserID, Instant createdAt, Instant lastSeenAt, boolean preexisting) {
         this.minecraftUUID = minecraftUUID;
         this.minecraftUsername = minecraftUsername;
         this.discordUserID = discordUserID;
         this.createdAt = createdAt;
+        this.lastSeenAt = lastSeenAt;
         this.preexisting = preexisting;
     }
 
@@ -35,6 +37,10 @@ public class User {
         return createdAt;
     }
 
+    public Instant getLastSeenAt() {
+        return lastSeenAt;
+    }
+
     public boolean isPreexisting() {
         return preexisting;
     }
@@ -45,5 +51,9 @@ public class User {
 
     public void setDiscordUserID(long discordUserID) {
         this.discordUserID = discordUserID;
+    }
+
+    public void setLastSeenAt(Instant lastSeenAt) {
+        this.lastSeenAt = lastSeenAt;
     }
 }

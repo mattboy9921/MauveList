@@ -25,6 +25,7 @@ public class UserController {
                 user.getMinecraftUsername(),
                 user.getDiscordUserID(),
                 user.getCreatedAt(),
+                user.getLastSeenAt(),
                 user.isPreexisting()
         );
 

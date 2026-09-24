@@ -4,6 +4,7 @@ CREATE TABLE users (
     minecraft_username VARCHAR(16) NOT NULL,
     discord_user_id BIGINT UNSIGNED NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at TIMESTAMP NULL,
     preexisting BOOLEAN NOT NULL DEFAULT FALSE,
 
     PRIMARY KEY (id),

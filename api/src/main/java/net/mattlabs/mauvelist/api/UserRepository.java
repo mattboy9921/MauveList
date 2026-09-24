@@ -11,6 +11,7 @@ public class UserRepository {
                 "minecraftUsername",
                 1,
                 Instant.now(),
+                null,
                 false
         );
     }
