@@ -1,5 +1,7 @@
 package net.mattlabs.mauvelist.api.logging;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -13,11 +15,21 @@ public class ConsoleOutputFormatter extends Formatter {
 
     @Override
     public String format(LogRecord record) {
-        return String.format(
+        StringBuilder output = new StringBuilder();
+
+        output.append(String.format(
                 "[%s %s]: %s%n",
                 timeFormat.format(Instant.ofEpochMilli(record.getMillis())),
                 record.getLevel().getName(),
                 formatMessage(record)
-        );
+        ));
+
+        if (record.getThrown() != null) {
+            StringWriter writer = new StringWriter();
+            record.getThrown().printStackTrace(new PrintWriter(writer));
+            output.append(writer);
+        }
+
+        return output.toString();
     }
 }

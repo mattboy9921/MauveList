@@ -1,6 +1,7 @@
 package net.mattlabs.mauvelist.api;
 
 import io.leangen.geantyref.TypeToken;
+import net.mattlabs.mauvelist.api.communication.CommunicationManager;
 import net.mattlabs.mauvelist.api.config.Config;
 import net.mattlabs.mauvelist.api.config.ConfigurateManager;
 import net.mattlabs.mauvelist.api.logging.ConsoleOutputHandler;
@@ -9,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -20,10 +20,10 @@ public class MauveListAPI {
     private Logger logger;
     private Config config;
     private final Path dataFolder;
-    private final CountDownLatch shutdownLatch = new CountDownLatch(1);
-    private AtomicBoolean stopping = new AtomicBoolean(false);
+    private final AtomicBoolean stopping = new AtomicBoolean(false);
 
     private DatabaseManager databaseManager;
+    private CommunicationManager communicationManager;
 
     public MauveListAPI() {
         initializeLogging();
@@ -38,7 +38,6 @@ public class MauveListAPI {
         Runtime.getRuntime().addShutdownHook(new Thread(api::stop));
 
         api.start();
-        api.awaitShutdown();
     }
 
     public void start() {
@@ -46,21 +45,13 @@ public class MauveListAPI {
 
         initializeConfig();
         initializeDatabase();
+        initializeCommunication();
 
         logger.info("MauveList API Started!");
     }
 
-    public void awaitShutdown() {
-        try {
-            shutdownLatch.await();
-        }
-        catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
     public void stop() {
-        if (!stopping.compareAndSet(false, true)) {
+        if (stopping.compareAndSet(false, true)) {
             logger.info("Stopping MauveListAPI...");
 
             // Close database connections
@@ -72,7 +63,14 @@ public class MauveListAPI {
                 logger.info("Database disconnected!");
             }
 
-            shutdownLatch.countDown();
+            // Stop communication
+            if (communicationManager != null) {
+                logger.info("Stopping communication...");
+
+                communicationManager.stop();
+
+                logger.info("Communication stopped!");
+            }
 
             logger.info("MauveList API Stopped!");
         }
@@ -146,6 +144,15 @@ public class MauveListAPI {
         else {
             throw new IllegalStateException("Database migration failure");
         }
+    }
+
+    private void initializeCommunication() {
+        logger.info("Initializing communication...");
+
+        communicationManager = new CommunicationManager();
+        communicationManager.start();
+
+        logger.info("Communication initialization successful!");
     }
 
     public Logger getLogger() {

@@ -42,5 +42,22 @@
             <artifactId>flyway-mysql</artifactId>
             <version>13.7.0</version>
         </dependency>
+        <!-- For Javalin -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>7.2.3</version>
+        </dependency>
+        <!-- For JSON Object Mapping (For Javalin) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.22.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.22.3</version>
+        </dependency>
     </dependencies>
 </project>
