@@ -55,11 +55,17 @@
             <version>[26.2.build,)</version>
             <scope>provided</scope>
         </dependency>
-        <!-- For Configurate -->
+        <!-- For Common -->
         <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>configurate-hocon</artifactId>
-            <version>4.2.0</version>
+            <groupId>net.mattlabs.mauvelist</groupId>
+            <artifactId>common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <!-- For JSON Object Mapping -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.22.1</version>
         </dependency>
     </dependencies>
 

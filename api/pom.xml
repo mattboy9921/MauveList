@@ -23,11 +23,11 @@
     </repositories>
 
     <dependencies>
-        <!-- For Configurate -->
+        <!-- For Common -->
         <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>configurate-hocon</artifactId>
-            <version>4.2.0</version>
+            <groupId>net.mattlabs.mauvelist</groupId>
+            <artifactId>common</artifactId>
+            <version>${revision}</version>
         </dependency>
         <!-- For MariaDB Driver -->
         <dependency>

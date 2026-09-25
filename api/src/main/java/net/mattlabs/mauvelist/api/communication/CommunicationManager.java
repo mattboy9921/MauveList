@@ -8,8 +8,11 @@ import io.javalin.json.JavalinJackson;
 public class CommunicationManager {
 
     private final Javalin app;
+    private UserController userController;
 
     public CommunicationManager() {
+        userController = new UserController();
+
         app = Javalin.create(config -> {
             // JSON Mapping with ISO time format
             JavalinJackson jackson = new JavalinJackson();
@@ -20,7 +23,8 @@ public class CommunicationManager {
 
             // Routes
             config.routes.get("/health", new HealthController()::getHealth);
-            config.routes.get("/api/v1/users/{uuid}", new UserController()::getUser);
+            config.routes.get("/api/v1/users/{uuid}", userController::getUser);
+            config.routes.post("/api/v1/users/{uuid}/activity", userController::playerActivity);
         });
     }
 

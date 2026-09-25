@@ -1,4 +1,4 @@
-package net.mattlabs.mauvelist.config;
+package net.mattlabs.mauvelist.plugin.config;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
@@ -25,4 +25,28 @@ public class Config {
             By Mattboy9921
             https://github.com/mattboy9921/MauveList""")
     private boolean _mattIsAwesome = true;
+
+    @ConfigSerializable
+    public static class Connection {
+        @Comment("\nThe hostname or IP address of the MauveList server.")
+        private String hostname = "localhost";
+
+        public String getHostname() {
+            return hostname;
+        }
+
+        @Comment("\nThe port for the Mauvelist server.")
+        private int port = 8080;
+
+        public int getPort() {
+            return port;
+        }
+    }
+
+    @Comment("\n** Connection Configuration Settings **")
+    private Connection connection = new Connection();
+
+    public Connection getConnection() {
+        return connection;
+    }
 }

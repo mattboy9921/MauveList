@@ -1,4 +1,4 @@
-package net.mattlabs.mauvelist.api.config;
+package net.mattlabs.mauvelist.common;
 
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.configurate.CommentedConfigurationNode;

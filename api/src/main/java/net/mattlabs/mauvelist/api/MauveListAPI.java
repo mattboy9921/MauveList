@@ -3,8 +3,8 @@ package net.mattlabs.mauvelist.api;
 import io.leangen.geantyref.TypeToken;
 import net.mattlabs.mauvelist.api.communication.CommunicationManager;
 import net.mattlabs.mauvelist.api.config.Config;
-import net.mattlabs.mauvelist.api.config.ConfigurateManager;
 import net.mattlabs.mauvelist.api.logging.ConsoleOutputHandler;
+import net.mattlabs.mauvelist.common.ConfigurateManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,6 +21,7 @@ public class MauveListAPI {
     private Config config;
     private final Path dataFolder;
     private final AtomicBoolean stopping = new AtomicBoolean(false);
+    private static MauveListAPI instance;
 
     private DatabaseManager databaseManager;
     private CommunicationManager communicationManager;
@@ -29,6 +30,8 @@ public class MauveListAPI {
         initializeLogging();
 
         this.dataFolder = Path.of("MauveListAPI");
+
+        instance = this;
     }
 
     static void main(String[] args) {
@@ -153,6 +156,10 @@ public class MauveListAPI {
         communicationManager.start();
 
         logger.info("Communication initialization successful!");
+    }
+
+    public static MauveListAPI getInstance() {
+        return instance;
     }
 
     public Logger getLogger() {
