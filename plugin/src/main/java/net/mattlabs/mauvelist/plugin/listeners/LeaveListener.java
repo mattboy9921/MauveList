@@ -1,7 +1,7 @@
 package net.mattlabs.mauvelist.plugin.listeners;
 
-import net.mattlabs.mauvelist.plugin.CommunicationManager;
 import net.mattlabs.mauvelist.plugin.MauveList;
+import net.mattlabs.mauvelist.plugin.communication.CommunicationManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,7 +10,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class LeaveListener implements Listener {
 
-    private CommunicationManager communicationManager;
+    private final CommunicationManager communicationManager;
 
     public LeaveListener() {
         communicationManager = MauveList.getInstance().getCommunicationManager();

@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 public class UserController {
 
     private final UserManager userManager;
-    private Logger logger;
+    private final Logger logger;
 
     public UserController() {
         userManager = new UserManager();
@@ -47,7 +47,7 @@ public class UserController {
                 request.minecraftUsername(),
                 1L,
                 Instant.now(),
-                Instant.now(),
+                request.occurredAt(),
                 false
         );
 

@@ -1,7 +1,9 @@
 package net.mattlabs.mauvelist.plugin;
 
 import io.leangen.geantyref.TypeToken;
+import net.mattlabs.mauvelist.common.ConfigurateFormat;
 import net.mattlabs.mauvelist.common.ConfigurateManager;
+import net.mattlabs.mauvelist.plugin.communication.CommunicationManager;
 import net.mattlabs.mauvelist.plugin.config.Config;
 import net.mattlabs.mauvelist.plugin.listeners.JoinListener;
 import net.mattlabs.mauvelist.plugin.listeners.LeaveListener;
@@ -38,12 +40,20 @@ public class MauveList extends JavaPlugin {
         logger.info("Mauvelist plugin started!");
     }
 
+    public void onDisable() {
+        logger.info("Disabling MauveList plugin...");
+
+        communicationManager.shutdown();
+
+        logger.info("MauveList plugin disabled!");
+    }
+
     private void initializeConfig() {
         // Initialize Configurate Manager
         configurateManager = new ConfigurateManager(getDataFolder(), getLogger());
 
         // Add config
-        configurateManager.add("config.conf", TypeToken.get(Config.class), new Config(), Config::new);
+        configurateManager.add("config.conf", TypeToken.get(Config.class), new Config(), Config::new, ConfigurateFormat.HOCON);
 
         // Try to save default values
         if (!configurateManager.saveDefaults("config.conf")) throw new IllegalStateException("Failed to save default config");
@@ -63,5 +73,9 @@ public class MauveList extends JavaPlugin {
 
     public CommunicationManager getCommunicationManager() {
         return communicationManager;
+    }
+
+    public ConfigurateManager getConfigurateManager() {
+        return configurateManager;
     }
 }

@@ -4,6 +4,7 @@ import io.leangen.geantyref.TypeToken;
 import net.mattlabs.mauvelist.api.communication.CommunicationManager;
 import net.mattlabs.mauvelist.api.config.Config;
 import net.mattlabs.mauvelist.api.logging.ConsoleOutputHandler;
+import net.mattlabs.mauvelist.common.ConfigurateFormat;
 import net.mattlabs.mauvelist.common.ConfigurateManager;
 
 import java.io.IOException;
@@ -106,7 +107,7 @@ public class MauveListAPI {
         ConfigurateManager configurateManager = new ConfigurateManager(dataFolder.toFile(), logger);
 
         // Add config
-        configurateManager.add("config.conf", TypeToken.get(Config.class), new Config(), Config::new);
+        configurateManager.add("config.conf", TypeToken.get(Config.class), new Config(), Config::new, ConfigurateFormat.HOCON);
 
         // Try to save default values
         if (!configurateManager.saveDefaults("config.conf")) throw new IllegalStateException("Failed to save default config");

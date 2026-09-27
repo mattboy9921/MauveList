@@ -1,3 +1,8 @@
 package net.mattlabs.mauvelist.common.records;
 
-public record PlayerActivityRequest(String minecraftUsername) {}
+import java.time.Instant;
+
+public record PlayerActivityRequest(
+        String minecraftUsername,
+        Instant occurredAt
+) {}

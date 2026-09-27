@@ -1,8 +1,9 @@
 package net.mattlabs.mauvelist.common;
 
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
@@ -63,10 +64,11 @@ public class ConfigurateManager {
      * @param typeToken                  the type token describing the configuration type
      * @param configSerializable         the initial configuration instance to be serialized
      * @param configSerializableSupplier a supplier used to create a default configuration instance when loading
+     * @param format                     the format of the configuration loader
      * @param <T>                        the type of the configuration object
      */
-    public <T> void add(String fileName, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier) {
-        add(fileName, typeToken, configSerializable, configSerializableSupplier, configurationOptions -> configurationOptions.shouldCopyDefaults(true), null);
+    public <T> void add(String fileName, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, ConfigurateFormat format) {
+        add(fileName, typeToken, configSerializable, configSerializableSupplier, format, configurationOptions -> configurationOptions.shouldCopyDefaults(true), null);
     }
 
     /**
@@ -79,11 +81,12 @@ public class ConfigurateManager {
      * @param typeToken                  the type token describing the configuration type
      * @param configSerializable         the initial configuration instance to be serialized
      * @param configSerializableSupplier a supplier used to create a default configuration instance when loading
+     * @param format                     the format of the configuration loader
      * @param transformation             the versioned transformation to apply when loading, or {@code null} if none
      * @param <T>                        the type of the configuration object
      */
-    public <T> void add(String fileName, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, ConfigurationTransformation.Versioned transformation) {
-        add(fileName, typeToken, configSerializable, configSerializableSupplier, configurationOptions -> configurationOptions.shouldCopyDefaults(true), transformation);
+    public <T> void add(String fileName, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, ConfigurateFormat format, ConfigurationTransformation.Versioned transformation) {
+        add(fileName, typeToken, configSerializable, configSerializableSupplier, format, configurationOptions -> configurationOptions.shouldCopyDefaults(true), transformation);
     }
 
     /**
@@ -93,12 +96,13 @@ public class ConfigurateManager {
      * @param typeToken                  the type token describing the configuration type
      * @param configSerializable         the initial configuration instance to be serialized
      * @param configSerializableSupplier a supplier used to create a default configuration instance when loading
+     * @param format                     the format of the configuration loader
      * @param configurationOptions       a function used to customize the default {@link ConfigurationOptions}
      * @param <T>                        the type of the configuration object
      */
     @SuppressWarnings("unused")
-    public <T> void add(String fileName, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, UnaryOperator<ConfigurationOptions> configurationOptions) {
-        add(fileName, typeToken, configSerializable, configSerializableSupplier, configurationOptions, null);
+    public <T> void add(String fileName, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, ConfigurateFormat format, UnaryOperator<ConfigurationOptions> configurationOptions) {
+        add(fileName, typeToken, configSerializable, configSerializableSupplier, format, configurationOptions, null);
     }
 
     /**
@@ -110,16 +114,24 @@ public class ConfigurateManager {
      * @param typeToken                  the type token describing the configuration type
      * @param configSerializable         the initial configuration instance to be serialized
      * @param configSerializableSupplier a supplier used to create a default configuration instance when loading
+     * @param format                     the format of the configuration loader
      * @param configurationOptions       a function used to customize the default {@link ConfigurationOptions}
      * @param transformation             the versioned transformation to apply when loading, or {@code null} if none
      * @param <T>                        the type of the configuration object
      */
-    public <T> void add(String fileName, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, UnaryOperator<ConfigurationOptions> configurationOptions, ConfigurationTransformation.Versioned transformation) {
+    public <T> void add(String fileName, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, ConfigurateFormat format, UnaryOperator<ConfigurationOptions> configurationOptions, ConfigurationTransformation.Versioned transformation) {
         File file = new File(dataFolder, fileName);
-        ConfigurationLoader<CommentedConfigurationNode> loader =
-                HoconConfigurationLoader.builder()
-                        .path(file.toPath())
-                        .defaultOptions(configurationOptions).build();
+        ConfigurationLoader<? extends ConfigurationNode> loader;
+        if (format == ConfigurateFormat.HOCON) {
+            loader = HoconConfigurationLoader.builder()
+                            .path(file.toPath())
+                            .defaultOptions(configurationOptions).build();
+        }
+        else {
+            loader = GsonConfigurationLoader.builder()
+                            .path(file.toPath())
+                            .defaultOptions(configurationOptions).build();
+        }
         ConfigNode<T> configNode = new ConfigNode<>(file, typeToken, configSerializable, configSerializableSupplier, loader, transformation);
         configMap.put(fileName, configNode);
     }
@@ -138,7 +150,7 @@ public class ConfigurateManager {
         @SuppressWarnings("unchecked")
         ConfigNode<T> configNode = configMap.get(fileName);
         File file = configNode.getFile();
-        ConfigurationLoader<CommentedConfigurationNode> loader = configNode.getLoader();
+        ConfigurationLoader<? extends ConfigurationNode> loader = configNode.getLoader();
 
         if (!file.exists()) {
             logger.info("\"" + fileName + "\" file doesn't exist, creating...");
@@ -147,6 +159,7 @@ public class ConfigurateManager {
             }
             catch (IOException | StackOverflowError e) {
                 logger.severe("Failed to save \"" + fileName + "\"!");
+                e.printStackTrace();
                 return false;
             }
         }
@@ -162,7 +175,7 @@ public class ConfigurateManager {
     public <T> void save(String fileName) {
         @SuppressWarnings("unchecked")
         ConfigNode<T> configNode = configMap.get(fileName);
-        ConfigurationLoader<CommentedConfigurationNode> loader = configNode.getLoader();
+        ConfigurationLoader<? extends ConfigurationNode> loader = configNode.getLoader();
 
         try {
             loader.save(loader.createNode().set(configNode.getTypeToken(), configNode.getConfigSerializable()));
@@ -185,8 +198,8 @@ public class ConfigurateManager {
     public <T> void load(String fileName) {
         @SuppressWarnings("unchecked")
         ConfigNode<T> configNode = configMap.get(fileName);
-        ConfigurationLoader<CommentedConfigurationNode> loader = configNode.getLoader();
-        CommentedConfigurationNode node;
+        ConfigurationLoader<? extends ConfigurationNode> loader = configNode.getLoader();
+        ConfigurationNode node;
         ConfigurationTransformation.Versioned transformation = configNode.getTransformation();
 
         try {
@@ -249,7 +262,7 @@ public class ConfigurateManager {
         private final TypeToken<T> typeToken;
         private T configSerializable;
         private final Supplier<T> configSerializableSupplier;
-        private final ConfigurationLoader<CommentedConfigurationNode> loader;
+        private final ConfigurationLoader<? extends ConfigurationNode> loader;
 
         private final ConfigurationTransformation.Versioned transformation;
 
@@ -263,7 +276,7 @@ public class ConfigurateManager {
          * @param loader                      the Configurate loader used to read/write the configuration
          * @param transformation              the versioned transformation to apply on load, or {@code null} if none
          */
-        public ConfigNode(File file, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, ConfigurationLoader<CommentedConfigurationNode> loader, ConfigurationTransformation.Versioned transformation) {
+        public ConfigNode(File file, TypeToken<T> typeToken, T configSerializable, Supplier<T> configSerializableSupplier, ConfigurationLoader<? extends ConfigurationNode> loader, ConfigurationTransformation.Versioned transformation) {
             this.file = file;
             this.typeToken = typeToken;
             this.configSerializable = configSerializable;
@@ -303,7 +316,7 @@ public class ConfigurateManager {
         /**
          * @return the loader used to read and write this configuration
          */
-        public ConfigurationLoader<CommentedConfigurationNode> getLoader() {
+        public ConfigurationLoader<? extends ConfigurationNode> getLoader() {
             return loader;
         }
 
