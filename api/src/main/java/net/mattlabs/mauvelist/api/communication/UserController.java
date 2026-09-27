@@ -7,7 +7,6 @@ import net.mattlabs.mauvelist.api.UserManager;
 import net.mattlabs.mauvelist.api.UserResponse;
 import net.mattlabs.mauvelist.common.records.PlayerActivityRequest;
 
-import java.time.Instant;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -26,33 +25,33 @@ public class UserController {
 
         User user = userManager.getUser(uuid);
 
-        UserResponse response = new UserResponse(
-                user.getMinecraftUUID(),
-                user.getMinecraftUsername(),
-                user.getDiscordUserID(),
-                user.getCreatedAt(),
-                user.getLastSeenAt(),
-                user.isPreexisting()
-        );
+        if (user != null) {
+            UserResponse response = new UserResponse(
+                    user.getMinecraftUUID(),
+                    user.getMinecraftUsername(),
+                    user.getDiscordUserID(),
+                    user.getCreatedAt(),
+                    user.getLastSeenAt(),
+                    user.isPreexisting()
+            );
 
-        context.json(response);
+            context.json(response);
+        }
+        else {
+            context.status(404);
+        }
     }
 
     public void playerActivity(Context context) {
         UUID uuid = UUID.fromString(context.pathParam("uuid"));
         PlayerActivityRequest request = context.bodyAsClass(PlayerActivityRequest.class);
 
-        UserResponse response = new UserResponse(
-                uuid,
-                request.minecraftUsername(),
-                1L,
-                Instant.now(),
-                request.occurredAt(),
-                false
-        );
+        logger.info("Received player activity request for user " + request.minecraftUsername() + " (" + uuid + ").");
 
-        context.json(response);
+        User user = new User(uuid, request.minecraftUsername(), null, null, request.occurredAt(), false);
 
-        logger.info("Received player activity request: " + response);
+        userManager.updateLastSeen(user);
+
+        context.status(204);
     }
 }

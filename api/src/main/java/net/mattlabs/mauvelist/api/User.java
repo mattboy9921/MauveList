@@ -7,12 +7,12 @@ public class User {
 
     private final UUID minecraftUUID;
     private String minecraftUsername;
-    private long discordUserID;
+    private Long discordUserID;
     private final Instant createdAt;
     private Instant lastSeenAt;
     private final boolean preexisting;
 
-    public User(UUID minecraftUUID, String minecraftUsername, long discordUserID, Instant createdAt, Instant lastSeenAt, boolean preexisting) {
+    public User(UUID minecraftUUID, String minecraftUsername, Long discordUserID, Instant createdAt, Instant lastSeenAt, boolean preexisting) {
         this.minecraftUUID = minecraftUUID;
         this.minecraftUsername = minecraftUsername;
         this.discordUserID = discordUserID;
@@ -29,7 +29,7 @@ public class User {
         return minecraftUsername;
     }
 
-    public long getDiscordUserID() {
+    public Long getDiscordUserID() {
         return discordUserID;
     }
 

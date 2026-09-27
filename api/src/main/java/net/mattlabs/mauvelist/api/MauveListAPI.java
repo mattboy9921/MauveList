@@ -166,4 +166,8 @@ public class MauveListAPI {
     public Logger getLogger() {
         return logger;
     }
+
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
 }

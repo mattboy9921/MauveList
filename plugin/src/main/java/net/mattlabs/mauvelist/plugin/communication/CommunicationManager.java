@@ -199,12 +199,13 @@ public class CommunicationManager {
         // Try to send the request and return the result
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(response -> {
-                    if (response.statusCode() != 200) {
+                    if (response.statusCode() >= 200 && response.statusCode() < 300) return true;
+                    else {
                         if (healthy) logger.warning("Received response from MauveList API: " + response.body());
                         if (queueOnFailure && requestType == RequestType.POST) addRequestToQueue(url, requestType, body);
                         return false;
                     }
-                    return true;
+
                 })
                 .exceptionally(throwable -> {
                     if (healthy) logger.warning("Failed to communicate with MauveList API: " + throwable.getMessage());

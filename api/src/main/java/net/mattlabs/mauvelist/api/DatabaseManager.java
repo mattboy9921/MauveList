@@ -6,6 +6,8 @@ import org.mariadb.jdbc.MariaDbPoolDataSource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class DatabaseManager {
 
@@ -32,5 +34,9 @@ public class DatabaseManager {
         MigrateResult result = flyway.migrate();
 
         return result.success;
+    }
+
+    public Calendar utcCalendar() {
+        return Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     }
 }
