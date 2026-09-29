@@ -1,8 +1,12 @@
 package net.mattlabs.mauvelist.api.communication;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.websocket.WsContext;
 import io.javalin.websocket.WsErrorContext;
 import net.mattlabs.mauvelist.api.MauveListAPI;
+import net.mattlabs.mauvelist.common.records.NotificationType;
+import net.mattlabs.mauvelist.common.records.WebSocketNotification;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,8 +39,16 @@ public class NotificationManager {
 
     public void notifyChangesAvailable() {
         logger.info("Notifying " + connections.size() + " WebSocket client" + (connections.size() != 1 ? "s" : "") + " changes available...");
-        for (WsContext connection : connections) {
-            connection.send("changes_available");
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            String json = mapper.writeValueAsString(new WebSocketNotification(NotificationType.CHANGES_AVAILABLE));
+            for (WsContext connection : connections) {
+                connection.send(json);
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error parsing notification JSON", e);
         }
     }
 }

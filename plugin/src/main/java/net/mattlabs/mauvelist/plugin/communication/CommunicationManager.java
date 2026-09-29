@@ -7,7 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.leangen.geantyref.TypeToken;
 import net.mattlabs.mauvelist.common.ConfigurateFormat;
 import net.mattlabs.mauvelist.common.ConfigurateManager;
+import net.mattlabs.mauvelist.common.records.NotificationType;
 import net.mattlabs.mauvelist.common.records.PlayerActivityRequest;
+import net.mattlabs.mauvelist.common.records.WebSocketNotification;
 import net.mattlabs.mauvelist.plugin.MauveList;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -258,10 +260,18 @@ public class CommunicationManager {
             @Override
             public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
                 lastWebSocketResponse = Instant.now();
-                logger.info("Received WebSocket notification: " + data);
 
-                if (data.toString().equals("changes_available"))
-                    logger.info("MauveList API has changes available!");
+                try {
+                    WebSocketNotification notification = mapper.readValue(data.toString(), WebSocketNotification.class);
+
+                    if (notification.notificationType() == NotificationType.CHANGES_AVAILABLE) {
+                        logger.info("MauveList API notified changes are available!");
+                        synchronize();
+                    }
+                }
+                catch (JsonProcessingException e) {
+                    logger.warning("Error parsing WebSocket JSON: " + e.getMessage());
+                }
 
                 webSocket.request(1);
 
