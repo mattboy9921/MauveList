@@ -254,6 +254,9 @@ public class CommunicationManager {
             boolean healthy = healthStatus == HealthStatus.HEALTHY;
 
             WebSocket.Listener listener = new WebSocket.Listener() {
+
+                private final StringBuilder textBuffer = new StringBuilder();
+
                 @Override
                 public void onOpen(WebSocket webSocket) {
                     CommunicationManager.this.webSocket = webSocket;
@@ -269,16 +272,25 @@ public class CommunicationManager {
                 public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
                     lastWebSocketResponse = Instant.now();
 
-                    try {
-                        WebSocketNotification notification = mapper.readValue(data.toString(), WebSocketNotification.class);
+                    // Build message
+                    textBuffer.append(data);
 
-                        if (notification.notificationType() == NotificationType.CHANGES_AVAILABLE) {
-                            logger.info("MauveList API notified changes are available!");
-                            synchronize();
+                    // Process complete message
+                    if (last) {
+                        try {
+                            WebSocketNotification notification = mapper.readValue(data.toString(), WebSocketNotification.class);
+
+                            if (notification.notificationType() == NotificationType.CHANGES_AVAILABLE) {
+                                logger.info("MauveList API notified changes are available!");
+                                synchronize();
+                            }
                         }
-                    }
-                    catch (JsonProcessingException e) {
-                        logger.warning("Error parsing WebSocket JSON: " + e.getMessage());
+                        catch (JsonProcessingException e) {
+                            logger.warning("Error parsing WebSocket JSON: " + e.getMessage());
+                        }
+                        finally {
+                            textBuffer.setLength(0);
+                        }
                     }
 
                     webSocket.request(1);
