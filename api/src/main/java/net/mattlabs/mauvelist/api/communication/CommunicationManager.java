@@ -9,9 +9,11 @@ public class CommunicationManager {
 
     private final Javalin app;
     private final UserController userController;
+    private final NotificationManager notificationManager;
 
     public CommunicationManager() {
         userController = new UserController();
+        notificationManager = new NotificationManager();
 
         app = Javalin.create(config -> {
             // JSON Mapping with ISO time format
@@ -25,6 +27,12 @@ public class CommunicationManager {
             config.routes.get("/api/v1/health", new HealthController()::getHealth);
             config.routes.get("/api/v1/users/{uuid}", userController::getUser);
             config.routes.post("/api/v1/users/{uuid}/activity", userController::playerActivity);
+
+            config.routes.ws("/api/v1/notifications", ws -> {
+                ws.onConnect(notificationManager::connect);
+                ws.onClose(notificationManager::disconnect);
+                ws.onError(notificationManager::error);
+            });
         });
     }
 
@@ -34,5 +42,9 @@ public class CommunicationManager {
 
     public void stop() {
         app.stop();
+    }
+
+    public void notifyChangesAvailable() {
+        notificationManager.notifyChangesAvailable();
     }
 }

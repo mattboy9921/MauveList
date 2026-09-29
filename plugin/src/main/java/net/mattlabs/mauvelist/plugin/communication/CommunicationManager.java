@@ -17,9 +17,13 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.WebSocket;
+import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
@@ -31,8 +35,10 @@ public class CommunicationManager {
     private final Logger logger;
     private ConfigurateManager configurateManager;
     private CommunicationQueue queue;
-    private HealthStatus healthStatus;
+    private volatile HealthStatus healthStatus;
     private BukkitTask healthCheck;
+    private volatile WebSocket webSocket;
+    private volatile Instant lastWebSocketPing, lastWebSocketResponse;
 
     public CommunicationManager(String baseUrl) {
         logger = MauveList.getInstance().getLogger();
@@ -115,14 +121,15 @@ public class CommunicationManager {
         healthCheck = Bukkit.getScheduler().runTaskTimerAsynchronously(MauveList.getInstance(), () -> {
             sendHealthCheckRequest(url)
                     .thenAccept(success -> {
-                        // Bad response
-                        if (success) {
+                        if (success && webSocketPing()) {
                             if (healthStatus != HealthStatus.HEALTHY) {
                                 healthStatus = HealthStatus.HEALTHY;
                                 logger.info("Connection Health - Successfully connected to MauveList API");
                                 synchronize();
                             }
-                        } else {
+                        }
+                        // Bad response
+                        else {
                             if (healthStatus != HealthStatus.UNHEALTHY) {
                                 healthStatus = HealthStatus.UNHEALTHY;
                                 logger.warning("Connection Health - Failed to communicate with MauveList API");
@@ -221,5 +228,87 @@ public class CommunicationManager {
         saveQueue();
 
         logger.info("Communications shutdown complete!");
+    }
+
+    private void connectWebSocket() {
+        String url = baseUrl.replaceFirst("^http", "ws") + "/api/v1/notifications";
+
+        // Check API health status, only notify failure when API healthy
+        boolean healthy = healthStatus == HealthStatus.HEALTHY;
+
+        WebSocket.Listener listener = new WebSocket.Listener() {
+            @Override
+            public void onOpen(WebSocket webSocket) {
+                CommunicationManager.this.webSocket = webSocket;
+                lastWebSocketPing = Instant.now();
+                lastWebSocketResponse = Instant.now();
+
+                logger.info("Connected to MauveList API WebSocket!");
+
+                webSocket.request(1);
+            }
+
+            @Override
+            public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
+                lastWebSocketResponse = Instant.now();
+                logger.info("Received WebSocket notification: " + data);
+
+                if (data.toString().equals("changes_available"))
+                    logger.info("MauveList API has changes available!");
+
+                webSocket.request(1);
+
+                return null;
+            }
+
+            @Override
+            public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
+                logger.warning("MauveList API WebSocket disconnected: " + statusCode + " " + reason);
+
+                CommunicationManager.this.webSocket = null;
+
+                return null;
+            }
+
+            @Override
+            public void onError(WebSocket webSocket, Throwable error) {
+                if (healthy) logger.warning("MauveList API WebSocket error: " + error.getMessage());
+
+                CommunicationManager.this.webSocket = null;
+            }
+
+            @Override
+            public CompletionStage<?> onPong(WebSocket webSocket, ByteBuffer data) {
+                lastWebSocketResponse = Instant.now();
+
+                webSocket.request(1);
+
+                return null;
+            }
+        };
+
+        httpClient.newWebSocketBuilder().buildAsync(URI.create(url), listener)
+                .exceptionally(error -> {
+                    if (healthy) logger.warning("MauveList API WebSocket error: " + error.getMessage());
+
+                    return null;
+                });
+    }
+
+    public boolean webSocketPing() {
+        // No connected WebSocket
+        if (webSocket == null || webSocket.isInputClosed() || webSocket.isOutputClosed()) {
+            connectWebSocket();
+            return false;
+        }
+
+        // Only ping every 15 seconds
+        if (Duration.between(lastWebSocketPing, Instant.now()).getSeconds() >= 15) {
+            lastWebSocketPing = Instant.now();
+
+            webSocket.sendPing(ByteBuffer.wrap(new byte[]{1}));
+        }
+
+        return Duration.between(lastWebSocketResponse, Instant.now()).getSeconds() < 30;
     }
 }
