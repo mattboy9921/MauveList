@@ -278,7 +278,7 @@ public class CommunicationManager {
                     // Process complete message
                     if (last) {
                         try {
-                            WebSocketNotification notification = mapper.readValue(data.toString(), WebSocketNotification.class);
+                            WebSocketNotification notification = mapper.readValue(textBuffer.toString(), WebSocketNotification.class);
 
                             if (notification.notificationType() == NotificationType.CHANGES_AVAILABLE) {
                                 logger.info("MauveList API notified changes are available!");
