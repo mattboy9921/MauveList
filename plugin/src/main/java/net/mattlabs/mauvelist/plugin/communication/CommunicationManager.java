@@ -42,7 +42,7 @@ public class CommunicationManager {
     private BukkitTask healthCheck;
     private volatile WebSocket webSocket;
     private volatile Instant lastWebSocketPing, lastWebSocketResponse;
-    private AtomicBoolean webSocketConnecting;
+    private final AtomicBoolean webSocketConnecting, synchronizing;
 
     public CommunicationManager(String baseUrl) {
         logger = MauveList.getInstance().getLogger();
@@ -57,13 +57,15 @@ public class CommunicationManager {
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        // Health check
-        initializeHealthCheck();
+        // Ensure methods only run one instance at a time
+        webSocketConnecting = new AtomicBoolean(false);
+        synchronizing = new AtomicBoolean(false);
 
         // Communication Queue
         initializeQueue();
 
-        webSocketConnecting = new AtomicBoolean(false);
+        // Health check
+        initializeHealthCheck();
 
         logger.info("Communication initialized!");
     }
@@ -146,33 +148,39 @@ public class CommunicationManager {
     }
 
     private void synchronize() {
-        logger.info("Initializing API sync...");
+        if (synchronizing.compareAndSet(false, true)) {
+            logger.info("Initializing API sync...");
 
-        if (!queue.getQueuedRequests().isEmpty()) {
-            logger.info("Processing " + queue.getQueuedRequests().size() + " queued requests...");
+            if (!queue.getQueuedRequests().isEmpty()) {
+                logger.info("Processing " + queue.getQueuedRequests().size() + " queued requests...");
+            }
+
             // Recursively process requests
-            processNextQueuedRequest();
+            processNextQueuedRequest()
+                    .thenRun(() -> logger.info("API sync completed!"))
+                    .whenComplete((result, error) -> synchronizing.set(false));
         }
-
-        logger.info("API sync completed!");
     }
 
-    private void processNextQueuedRequest() {
+    private CompletableFuture<Void> processNextQueuedRequest() {
         // Grab next request from queue
         QueuedRequest request = queue.getQueuedRequests().peek();
 
         if (request != null) {
-            sendQueuedRequest(request.url(), request.requestType(), request.body())
-                    .thenAccept(success -> {
+            return sendQueuedRequest(request.url(), request.requestType(), request.body())
+                    .thenCompose(success -> {
                         // Request failed
-                        if (!success) return;
+                        if (!success) return CompletableFuture.completedFuture(null);
 
                         // Request succeeded, remove it from the queue
                         queue.getQueuedRequests().poll();
                         saveQueue();
 
-                        processNextQueuedRequest();
+                        return processNextQueuedRequest();
                     });
+        }
+        else {
+            return CompletableFuture.completedFuture(null);
         }
     }
 
@@ -239,85 +247,86 @@ public class CommunicationManager {
     }
 
     private void connectWebSocket() {
-        webSocketConnecting.set(true);
-        String url = baseUrl.replaceFirst("^http", "ws") + "/api/v1/notifications";
+        if (webSocketConnecting.compareAndSet(false, true)) {
+            String url = baseUrl.replaceFirst("^http", "ws") + "/api/v1/notifications";
 
-        // Check API health status, only notify failure when API healthy
-        boolean healthy = healthStatus == HealthStatus.HEALTHY;
+            // Check API health status, only notify failure when API healthy
+            boolean healthy = healthStatus == HealthStatus.HEALTHY;
 
-        WebSocket.Listener listener = new WebSocket.Listener() {
-            @Override
-            public void onOpen(WebSocket webSocket) {
-                CommunicationManager.this.webSocket = webSocket;
-                lastWebSocketPing = Instant.now();
-                lastWebSocketResponse = Instant.now();
+            WebSocket.Listener listener = new WebSocket.Listener() {
+                @Override
+                public void onOpen(WebSocket webSocket) {
+                    CommunicationManager.this.webSocket = webSocket;
+                    lastWebSocketPing = Instant.now();
+                    lastWebSocketResponse = Instant.now();
 
-                logger.info("Connected to MauveList API WebSocket!");
+                    logger.info("Connected to MauveList API WebSocket!");
 
-                webSocket.request(1);
-            }
+                    webSocket.request(1);
+                }
 
-            @Override
-            public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
-                lastWebSocketResponse = Instant.now();
+                @Override
+                public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
+                    lastWebSocketResponse = Instant.now();
 
-                try {
-                    WebSocketNotification notification = mapper.readValue(data.toString(), WebSocketNotification.class);
+                    try {
+                        WebSocketNotification notification = mapper.readValue(data.toString(), WebSocketNotification.class);
 
-                    if (notification.notificationType() == NotificationType.CHANGES_AVAILABLE) {
-                        logger.info("MauveList API notified changes are available!");
-                        synchronize();
+                        if (notification.notificationType() == NotificationType.CHANGES_AVAILABLE) {
+                            logger.info("MauveList API notified changes are available!");
+                            synchronize();
+                        }
                     }
-                }
-                catch (JsonProcessingException e) {
-                    logger.warning("Error parsing WebSocket JSON: " + e.getMessage());
-                }
+                    catch (JsonProcessingException e) {
+                        logger.warning("Error parsing WebSocket JSON: " + e.getMessage());
+                    }
 
-                webSocket.request(1);
-
-                return null;
-            }
-
-            @Override
-            public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
-                logger.warning("MauveList API WebSocket disconnected: " + statusCode + " " + reason);
-
-                CommunicationManager.this.webSocket = null;
-
-                return null;
-            }
-
-            @Override
-            public void onError(WebSocket webSocket, Throwable error) {
-                if (healthy) logger.warning("MauveList API WebSocket error: " + error.getMessage());
-
-                CommunicationManager.this.webSocket = null;
-            }
-
-            @Override
-            public CompletionStage<?> onPong(WebSocket webSocket, ByteBuffer data) {
-                lastWebSocketResponse = Instant.now();
-
-                webSocket.request(1);
-
-                return null;
-            }
-        };
-
-        httpClient.newWebSocketBuilder().buildAsync(URI.create(url), listener)
-                .exceptionally(error -> {
-                    if (healthy) logger.warning("MauveList API WebSocket error: " + error.getMessage());
+                    webSocket.request(1);
 
                     return null;
-                });
+                }
 
-        webSocketConnecting.set(false);
+                @Override
+                public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
+                    logger.warning("MauveList API WebSocket disconnected: " + statusCode + " " + reason);
+
+                    CommunicationManager.this.webSocket = null;
+
+                    return null;
+                }
+
+                @Override
+                public void onError(WebSocket webSocket, Throwable error) {
+                    if (healthy) logger.warning("MauveList API WebSocket error: " + error.getMessage());
+
+                    CommunicationManager.this.webSocket = null;
+                }
+
+                @Override
+                public CompletionStage<?> onPong(WebSocket webSocket, ByteBuffer data) {
+                    lastWebSocketResponse = Instant.now();
+
+                    webSocket.request(1);
+
+                    return null;
+                }
+            };
+
+            httpClient.newWebSocketBuilder().buildAsync(URI.create(url), listener)
+                    .whenComplete((result, error) -> {
+                        webSocketConnecting.set(false);
+
+                        if (error != null && healthy) {
+                            logger.warning("MauveList API WebSocket error: " + error.getMessage());
+                        }
+                    });
+        }
     }
 
     public boolean webSocketPing() {
         // No connected WebSocket
         if (webSocket == null || webSocket.isInputClosed() || webSocket.isOutputClosed()) {
-            if (!webSocketConnecting.get()) connectWebSocket();
+            connectWebSocket();
             return false;
         }
 
