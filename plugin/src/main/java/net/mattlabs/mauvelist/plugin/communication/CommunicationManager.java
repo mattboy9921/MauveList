@@ -228,6 +228,8 @@ public class CommunicationManager {
     public void shutdown() {
         logger.info("Shutting down communications...");
 
+        if (webSocket != null && !webSocket.isInputClosed() && !webSocket.isOutputClosed())
+            webSocket.sendClose(1000, "MauveList plugin shutting down");
         healthCheck.cancel();
         saveQueue();
 
