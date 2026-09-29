@@ -302,7 +302,9 @@ public class CommunicationManager {
                 public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
                     logger.warning("MauveList API WebSocket disconnected: " + statusCode + " " + reason);
 
-                    CommunicationManager.this.webSocket = null;
+                    if (CommunicationManager.this.webSocket == webSocket) {
+                        CommunicationManager.this.webSocket = null;
+                    }
 
                     return null;
                 }
@@ -311,7 +313,9 @@ public class CommunicationManager {
                 public void onError(WebSocket webSocket, Throwable error) {
                     if (healthy) logger.warning("MauveList API WebSocket error: " + error.getMessage());
 
-                    CommunicationManager.this.webSocket = null;
+                    if (CommunicationManager.this.webSocket == webSocket) {
+                        CommunicationManager.this.webSocket = null;
+                    }
                 }
 
                 @Override
