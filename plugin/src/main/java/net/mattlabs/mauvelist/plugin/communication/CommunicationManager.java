@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 public class CommunicationManager {
@@ -39,6 +40,7 @@ public class CommunicationManager {
     private BukkitTask healthCheck;
     private volatile WebSocket webSocket;
     private volatile Instant lastWebSocketPing, lastWebSocketResponse;
+    private AtomicBoolean webSocketConnecting;
 
     public CommunicationManager(String baseUrl) {
         logger = MauveList.getInstance().getLogger();
@@ -58,6 +60,8 @@ public class CommunicationManager {
 
         // Communication Queue
         initializeQueue();
+
+        webSocketConnecting = new AtomicBoolean(false);
 
         logger.info("Communication initialized!");
     }
@@ -231,6 +235,7 @@ public class CommunicationManager {
     }
 
     private void connectWebSocket() {
+        webSocketConnecting.set(true);
         String url = baseUrl.replaceFirst("^http", "ws") + "/api/v1/notifications";
 
         // Check API health status, only notify failure when API healthy
@@ -293,12 +298,14 @@ public class CommunicationManager {
 
                     return null;
                 });
+
+        webSocketConnecting.set(false);
     }
 
     public boolean webSocketPing() {
         // No connected WebSocket
         if (webSocket == null || webSocket.isInputClosed() || webSocket.isOutputClosed()) {
-            connectWebSocket();
+            if (!webSocketConnecting.get()) connectWebSocket();
             return false;
         }
 
