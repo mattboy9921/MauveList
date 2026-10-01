@@ -1,4 +1,4 @@
-package net.mattlabs.mauvelist.plugin.communication;
+package net.mattlabs.mauvelist.common.communication;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,12 +7,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.leangen.geantyref.TypeToken;
 import net.mattlabs.mauvelist.common.config.ConfigurateFormat;
 import net.mattlabs.mauvelist.common.config.ConfigurateManager;
+import net.mattlabs.mauvelist.common.records.ApiRequest;
 import net.mattlabs.mauvelist.common.records.NotificationType;
-import net.mattlabs.mauvelist.common.records.PlayerActivityRequest;
 import net.mattlabs.mauvelist.common.records.WebSocketNotification;
-import net.mattlabs.mauvelist.plugin.MauveList;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
@@ -23,10 +20,7 @@ import java.net.http.WebSocket;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
@@ -36,17 +30,22 @@ public class CommunicationManager {
     private final String baseUrl;
     private final ObjectMapper mapper;
     private final Logger logger;
-    private ConfigurateManager configurateManager;
+    private final ConfigurateManager configurateManager;
     private CommunicationQueue queue;
     private volatile HealthStatus healthStatus;
-    private BukkitTask healthCheck;
+    private final ScheduledExecutorService scheduler;
+    private ScheduledFuture<?> healthCheck;
     private volatile WebSocket webSocket;
     private volatile Instant lastWebSocketPing, lastWebSocketResponse;
     private final AtomicBoolean webSocketConnecting, synchronizing;
 
-    public CommunicationManager(String baseUrl) {
-        logger = MauveList.getInstance().getLogger();
+    public CommunicationManager(String baseUrl, Logger logger, ConfigurateManager configurateManager) {
+        this.logger = logger;
         logger.info("Initializing communication...");
+
+        this.configurateManager = configurateManager;
+
+        scheduler = Executors.newSingleThreadScheduledExecutor();
 
         // HTTP
         this.baseUrl = baseUrl;
@@ -70,21 +69,7 @@ public class CommunicationManager {
         logger.info("Communication initialized!");
     }
 
-    public void playerActivity(UUID uuid, String name) {
-        try {
-            String url = baseUrl + "/api/v1/users/" + uuid + "/activity";
-            String json = mapper.writeValueAsString(new PlayerActivityRequest(name, Instant.now()));
-
-            sendPostRequest(url, json);
-        }
-        catch (JsonProcessingException e) {
-            logger.severe("Error processing JSON for request: " + e.getMessage());
-        }
-    }
-
     private void initializeQueue() {
-        // Get Configurate manager
-        configurateManager = MauveList.getInstance().getConfigurateManager();
 
         // Add JSON file with concurrent linked queue serializer
         configurateManager.add(
@@ -122,12 +107,10 @@ public class CommunicationManager {
     }
 
     private void initializeHealthCheck() {
-        String url = baseUrl + "/api/v1/health";
-
         healthStatus = HealthStatus.UNKNOWN;
 
-        healthCheck = Bukkit.getScheduler().runTaskTimerAsynchronously(MauveList.getInstance(), () -> {
-            sendHealthCheckRequest(url)
+        healthCheck = scheduler.scheduleAtFixedRate(() -> {
+            sendHealthCheckRequest()
                     .thenAccept(success -> {
                         if (success && webSocketPing()) {
                             if (healthStatus != HealthStatus.HEALTHY) {
@@ -144,7 +127,7 @@ public class CommunicationManager {
                             }
                         }
                     });
-        }, 0, 20);
+        }, 0, 1, TimeUnit.SECONDS);
     }
 
     private void synchronize() {
@@ -184,15 +167,28 @@ public class CommunicationManager {
         }
     }
 
-    private CompletableFuture<Boolean> sendGetRequest(String url) {
+    private <T> CompletableFuture<Boolean> sendGetRequest(ApiRequest<T> request) {
+        String url = baseUrl + request.endpoint();
+
         return sendRequest(url, RequestType.GET, null, true);
     }
 
-    private CompletableFuture<Boolean> sendPostRequest(String url, String body) {
-        return sendRequest(url, RequestType.POST, body, true);
+    public <T> CompletableFuture<Boolean> sendPostRequest(ApiRequest<T> request) {
+        try {
+            String url = baseUrl + request.endpoint();
+            String body = mapper.writeValueAsString(request.body());
+
+            return sendRequest(url, RequestType.POST, body, true);
+        }
+        catch (JsonProcessingException e) {
+            logger.severe("Error processing JSON for request: " + e.getMessage());
+            return CompletableFuture.completedFuture(false);
+        }
     }
 
-    private CompletableFuture<Boolean> sendHealthCheckRequest(String url) {
+    private CompletableFuture<Boolean> sendHealthCheckRequest() {
+        String url = baseUrl + "/api/v1/health";
+
         return sendRequest(url, RequestType.GET, null, false);
     }
 
@@ -240,7 +236,8 @@ public class CommunicationManager {
 
         if (webSocket != null && !webSocket.isInputClosed() && !webSocket.isOutputClosed())
             webSocket.sendClose(1000, "MauveList plugin shutting down");
-        healthCheck.cancel();
+        healthCheck.cancel(false);
+        scheduler.shutdown();
         saveQueue();
 
         logger.info("Communications shutdown complete!");

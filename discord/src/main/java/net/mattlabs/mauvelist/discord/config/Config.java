@@ -1,5 +1,6 @@
 package net.mattlabs.mauvelist.discord.config;
 
+import net.mattlabs.mauvelist.common.config.sections.Connection;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -24,4 +25,11 @@ public class Config {
             By Mattboy9921
             https://github.com/mattboy9921/MauveList""")
     private boolean _mattIsAwesome = true;
+
+    @Comment("\n** Connection Configuration Settings **")
+    private Connection connection = new Connection();
+
+    public Connection getConnection() {
+        return connection;
+    }
 }

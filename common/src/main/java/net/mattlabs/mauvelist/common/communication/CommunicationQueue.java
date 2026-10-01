@@ -1,4 +1,4 @@
-package net.mattlabs.mauvelist.plugin.communication;
+package net.mattlabs.mauvelist.common.communication;
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;

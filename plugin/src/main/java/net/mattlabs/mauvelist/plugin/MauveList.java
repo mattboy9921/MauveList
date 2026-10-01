@@ -1,8 +1,8 @@
 package net.mattlabs.mauvelist.plugin;
 
+import net.mattlabs.mauvelist.common.communication.CommunicationManager;
 import net.mattlabs.mauvelist.common.config.ConfigTools;
 import net.mattlabs.mauvelist.common.config.ConfigurateManager;
-import net.mattlabs.mauvelist.plugin.communication.CommunicationManager;
 import net.mattlabs.mauvelist.plugin.config.Config;
 import net.mattlabs.mauvelist.plugin.listeners.JoinListener;
 import net.mattlabs.mauvelist.plugin.listeners.LeaveListener;
@@ -36,7 +36,7 @@ public class MauveList extends JavaPlugin {
         int port = config.getConnection().getPort();
         String baseURL = "http://" + hostname + ":" + port;
 
-        communicationManager = new CommunicationManager(baseURL);
+        communicationManager = new CommunicationManager(baseURL, logger, configurateManager);
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new JoinListener(), this);

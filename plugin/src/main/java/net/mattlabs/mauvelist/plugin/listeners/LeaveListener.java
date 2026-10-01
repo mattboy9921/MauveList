@@ -1,12 +1,17 @@
 package net.mattlabs.mauvelist.plugin.listeners;
 
+import net.mattlabs.mauvelist.common.communication.CommunicationManager;
+import net.mattlabs.mauvelist.common.communication.Endpoints;
+import net.mattlabs.mauvelist.common.records.ApiRequest;
+import net.mattlabs.mauvelist.common.records.PlayerActivityRequest;
 import net.mattlabs.mauvelist.plugin.MauveList;
-import net.mattlabs.mauvelist.plugin.communication.CommunicationManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.time.Instant;
 
 public class LeaveListener implements Listener {
 
@@ -27,6 +32,10 @@ public class LeaveListener implements Listener {
     }
 
     private void onLeave(Player player) {
-        communicationManager.playerActivity(player.getUniqueId(), player.getName());
+
+        PlayerActivityRequest playerActivityRequest = new PlayerActivityRequest(player.getName(), Instant.now());
+        ApiRequest<PlayerActivityRequest> request = new ApiRequest<>(Endpoints.playerActivity(player.getUniqueId()), playerActivityRequest);
+
+        communicationManager.sendPostRequest(request);
     }
 }

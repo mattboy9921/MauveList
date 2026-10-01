@@ -1,4 +1,4 @@
-package net.mattlabs.mauvelist.plugin.communication;
+package net.mattlabs.mauvelist.common.communication;
 
 public enum HealthStatus {
     UNKNOWN,
