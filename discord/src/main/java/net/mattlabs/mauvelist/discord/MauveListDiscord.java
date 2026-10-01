@@ -2,7 +2,7 @@ package net.mattlabs.mauvelist.discord;
 
 import net.mattlabs.mauvelist.common.config.ConfigTools;
 import net.mattlabs.mauvelist.common.config.ConfigurateManager;
-import net.mattlabs.mauvelist.common.logging.Logging;
+import net.mattlabs.mauvelist.common.logging.LoggingTools;
 import net.mattlabs.mauvelist.discord.config.Config;
 
 import java.nio.file.Path;
@@ -17,7 +17,7 @@ public class MauveListDiscord {
     private final AtomicBoolean stopping = new AtomicBoolean(false);
 
     public MauveListDiscord() {
-        logger = Logging.initializeLogging(MauveListDiscord.class.getName());
+        logger = LoggingTools.initializeLogging(MauveListDiscord.class.getName());
 
         this.dataFolder = Path.of("MauveListDiscord");
     }

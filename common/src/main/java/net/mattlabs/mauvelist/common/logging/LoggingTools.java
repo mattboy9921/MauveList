@@ -4,7 +4,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Logging {
+public class LoggingTools {
 
     public static Logger initializeLogging(String className) {
         // Logging with custom handler

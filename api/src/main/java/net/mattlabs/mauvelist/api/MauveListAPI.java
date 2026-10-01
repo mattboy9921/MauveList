@@ -5,7 +5,7 @@ import net.mattlabs.mauvelist.api.config.Config;
 import net.mattlabs.mauvelist.api.database.DatabaseManager;
 import net.mattlabs.mauvelist.common.config.ConfigTools;
 import net.mattlabs.mauvelist.common.config.ConfigurateManager;
-import net.mattlabs.mauvelist.common.logging.Logging;
+import net.mattlabs.mauvelist.common.logging.LoggingTools;
 
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -24,7 +24,7 @@ public class MauveListAPI {
     private CommunicationManager communicationManager;
 
     public MauveListAPI() {
-        logger = Logging.initializeLogging(MauveListAPI.class.getName());
+        logger = LoggingTools.initializeLogging(MauveListAPI.class.getName());
 
         this.dataFolder = Path.of("MauveListAPI");
 
