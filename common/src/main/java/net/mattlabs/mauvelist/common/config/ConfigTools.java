@@ -6,11 +6,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 public class ConfigTools {
 
-    public static <T> T initializeConfig(Path dataFolder, Logger logger, String configFileName, Class<T> configClass, Supplier<T> defaultSupplier) {
+    public static <T> T initializeConfig(
+            Path dataFolder,
+            ConfigurateManager configurateManager,
+            String configFileName,
+            Class<T> configClass,
+            Supplier<T> defaultSupplier) {
         // Data Folder
         try {
             Files.createDirectories(dataFolder);
@@ -18,9 +22,6 @@ public class ConfigTools {
         catch (IOException e) {
             throw new IllegalStateException("Cannot create directory: " + dataFolder);
         }
-
-        // Initialize Configurate Manager
-        ConfigurateManager configurateManager = new ConfigurateManager(dataFolder.toFile(), logger);
 
         // Add config
         T defaultConfig = defaultSupplier.get();

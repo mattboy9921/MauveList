@@ -1,6 +1,7 @@
 package net.mattlabs.mauvelist.discord;
 
 import net.mattlabs.mauvelist.common.config.ConfigTools;
+import net.mattlabs.mauvelist.common.config.ConfigurateManager;
 import net.mattlabs.mauvelist.common.logging.Logging;
 import net.mattlabs.mauvelist.discord.config.Config;
 
@@ -33,7 +34,12 @@ public class MauveListDiscord {
     public void start() {
         logger.info("Starting MauveList Discord bot...");
 
-        config = ConfigTools.initializeConfig(dataFolder, logger, "config.conf", Config.class, Config::new);
+        config = ConfigTools.initializeConfig(
+                dataFolder,
+                new ConfigurateManager(dataFolder.toFile(), logger),
+                "config.conf",
+                Config.class,
+                Config::new);
 
         logger.info("MauveList Discord bot started!");
     }

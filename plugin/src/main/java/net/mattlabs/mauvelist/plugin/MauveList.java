@@ -1,7 +1,6 @@
 package net.mattlabs.mauvelist.plugin;
 
-import io.leangen.geantyref.TypeToken;
-import net.mattlabs.mauvelist.common.config.ConfigurateFormat;
+import net.mattlabs.mauvelist.common.config.ConfigTools;
 import net.mattlabs.mauvelist.common.config.ConfigurateManager;
 import net.mattlabs.mauvelist.plugin.communication.CommunicationManager;
 import net.mattlabs.mauvelist.plugin.config.Config;
@@ -25,7 +24,13 @@ public class MauveList extends JavaPlugin {
         logger = getLogger();
         logger.info("Starting Mauvelist plugin...");
 
-        initializeConfig();
+        configurateManager = new ConfigurateManager(getDataFolder(), getLogger());
+        config = ConfigTools.initializeConfig(
+                getDataPath(),
+                configurateManager,
+                "config.conf",
+                Config.class,
+                Config::new);
 
         String hostname = config.getConnection().getHostname();
         int port = config.getConnection().getPort();
@@ -46,25 +51,6 @@ public class MauveList extends JavaPlugin {
         communicationManager.shutdown();
 
         logger.info("MauveList plugin disabled!");
-    }
-
-    private void initializeConfig() {
-        // Initialize Configurate Manager
-        configurateManager = new ConfigurateManager(getDataFolder(), getLogger());
-
-        // Add config
-        configurateManager.add("config.conf", TypeToken.get(Config.class), new Config(), Config::new, ConfigurateFormat.HOCON);
-
-        // Try to save default values
-        if (!configurateManager.saveDefaults("config.conf")) throw new IllegalStateException("Failed to save default config");
-
-        // Load config
-        configurateManager.load("config.conf");
-
-        // Save/update config
-        configurateManager.save("config.conf");
-
-        config = configurateManager.get("config.conf");
     }
 
     public static MauveList getInstance() {

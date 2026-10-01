@@ -4,6 +4,7 @@ import net.mattlabs.mauvelist.api.communication.CommunicationManager;
 import net.mattlabs.mauvelist.api.config.Config;
 import net.mattlabs.mauvelist.api.database.DatabaseManager;
 import net.mattlabs.mauvelist.common.config.ConfigTools;
+import net.mattlabs.mauvelist.common.config.ConfigurateManager;
 import net.mattlabs.mauvelist.common.logging.Logging;
 
 import java.nio.file.Path;
@@ -42,7 +43,13 @@ public class MauveListAPI {
     public void start() {
         logger.info("Starting MauveListAPI...");
 
-        config = ConfigTools.initializeConfig(dataFolder, logger, "config.conf", Config.class, Config::new);
+        config = ConfigTools.initializeConfig(
+                dataFolder,
+                new ConfigurateManager(dataFolder.toFile(), logger),
+                "config.conf",
+                Config.class,
+                Config::new);
+
         initializeDatabase();
         initializeCommunication();
 
