@@ -1,0 +1,35 @@
+package net.mattlabs.mauvelist.common.logging;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+
+// Formats log messages for easy readability
+public class ConsoleOutputFormatter extends Formatter {
+
+    private static final DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+
+    @Override
+    public String format(LogRecord record) {
+        StringBuilder output = new StringBuilder();
+
+        output.append(String.format(
+                "[%s %s]: %s%n",
+                timeFormat.format(Instant.ofEpochMilli(record.getMillis())),
+                record.getLevel().getName(),
+                formatMessage(record)
+        ));
+
+        if (record.getThrown() != null) {
+            StringWriter writer = new StringWriter();
+            record.getThrown().printStackTrace(new PrintWriter(writer));
+            output.append(writer);
+        }
+
+        return output.toString();
+    }
+}

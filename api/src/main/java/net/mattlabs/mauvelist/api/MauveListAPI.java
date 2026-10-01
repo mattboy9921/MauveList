@@ -4,22 +4,20 @@ import io.leangen.geantyref.TypeToken;
 import net.mattlabs.mauvelist.api.communication.CommunicationManager;
 import net.mattlabs.mauvelist.api.config.Config;
 import net.mattlabs.mauvelist.api.database.DatabaseManager;
-import net.mattlabs.mauvelist.api.logging.ConsoleOutputHandler;
 import net.mattlabs.mauvelist.common.ConfigurateFormat;
 import net.mattlabs.mauvelist.common.ConfigurateManager;
+import net.mattlabs.mauvelist.common.logging.Logging;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MauveListAPI {
 
-    private Logger logger;
+    private final Logger logger;
     private Config config;
     private final Path dataFolder;
     private final AtomicBoolean stopping = new AtomicBoolean(false);
@@ -29,7 +27,7 @@ public class MauveListAPI {
     private CommunicationManager communicationManager;
 
     public MauveListAPI() {
-        initializeLogging();
+        logger = Logging.initializeLogging(MauveListAPI.class.getName());
 
         this.dataFolder = Path.of("MauveListAPI");
 
@@ -79,20 +77,6 @@ public class MauveListAPI {
 
             logger.info("MauveList API Stopped!");
         }
-    }
-
-    private void initializeLogging() {
-        // Logging with custom handler
-        Logger rootLogger = Logger.getLogger("");
-
-        for (Handler handler : rootLogger.getHandlers()) {
-            rootLogger.removeHandler(handler);
-        }
-
-        rootLogger.addHandler(new ConsoleOutputHandler());
-        rootLogger.setLevel(Level.INFO);
-
-        this.logger = Logger.getLogger(MauveListAPI.class.getName());
     }
 
     private void initializeConfig() {

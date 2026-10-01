@@ -11,4 +11,15 @@
 
     <artifactId>discord</artifactId>
 
+    <!-- Project dependencies -->
+
+    <dependencies>
+        <!-- For Common -->
+        <dependency>
+            <groupId>net.mattlabs.mauvelist</groupId>
+            <artifactId>common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
+
 </project>
