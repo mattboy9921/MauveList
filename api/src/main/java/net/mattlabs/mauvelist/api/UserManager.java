@@ -1,5 +1,7 @@
 package net.mattlabs.mauvelist.api;
 
+import net.mattlabs.mauvelist.api.database.UserRepository;
+
 import java.util.UUID;
 import java.util.logging.Logger;
 

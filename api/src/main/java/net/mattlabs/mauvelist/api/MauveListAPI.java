@@ -3,6 +3,7 @@ package net.mattlabs.mauvelist.api;
 import io.leangen.geantyref.TypeToken;
 import net.mattlabs.mauvelist.api.communication.CommunicationManager;
 import net.mattlabs.mauvelist.api.config.Config;
+import net.mattlabs.mauvelist.api.database.DatabaseManager;
 import net.mattlabs.mauvelist.api.logging.ConsoleOutputHandler;
 import net.mattlabs.mauvelist.common.ConfigurateFormat;
 import net.mattlabs.mauvelist.common.ConfigurateManager;

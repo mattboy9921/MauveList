@@ -1,4 +1,7 @@
-package net.mattlabs.mauvelist.api;
+package net.mattlabs.mauvelist.api.database;
+
+import net.mattlabs.mauvelist.api.MauveListAPI;
+import net.mattlabs.mauvelist.api.User;
 
 import java.sql.*;
 import java.time.Instant;

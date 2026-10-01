@@ -25,8 +25,11 @@ public class CommunicationManager {
 
             // Routes
             config.routes.get("/api/v1/health", new HealthController()::getHealth);
+
             config.routes.get("/api/v1/users/{uuid}", userController::getUser);
             config.routes.post("/api/v1/users/{uuid}/activity", userController::playerActivity);
+
+            config.routes.get("/api/v1/change-events", new ChangeEventController()::getEvents);
 
             config.routes.ws("/api/v1/notifications", ws -> {
                 ws.onConnect(notificationManager::connect);

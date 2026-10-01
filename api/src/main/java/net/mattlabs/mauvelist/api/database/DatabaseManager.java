@@ -1,4 +1,4 @@
-package net.mattlabs.mauvelist.api;
+package net.mattlabs.mauvelist.api.database;
 
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;

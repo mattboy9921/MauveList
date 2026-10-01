@@ -126,13 +126,13 @@ CREATE TABLE change_events (
     membership_id BIGINT UNSIGNED NULL,
     ban_id BIGINT UNSIGNED NULL,
     application_id BIGINT UNSIGNED NULL,
-    event VARCHAR(32) NOT NULL,
+    event_type VARCHAR(32) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
 
     KEY idx_change_events_user (user_id),
-    KEY idx_change_events_event (event),
+    KEY idx_change_events_event (event_type),
 
     CONSTRAINT fk_change_events_user FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_change_events_membership FOREIGN KEY (membership_id) REFERENCES memberships(id),
