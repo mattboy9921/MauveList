@@ -1,15 +1,11 @@
 package net.mattlabs.mauvelist.api;
 
-import io.leangen.geantyref.TypeToken;
 import net.mattlabs.mauvelist.api.communication.CommunicationManager;
 import net.mattlabs.mauvelist.api.config.Config;
 import net.mattlabs.mauvelist.api.database.DatabaseManager;
-import net.mattlabs.mauvelist.common.ConfigurateFormat;
-import net.mattlabs.mauvelist.common.ConfigurateManager;
+import net.mattlabs.mauvelist.common.config.ConfigTools;
 import net.mattlabs.mauvelist.common.logging.Logging;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,7 +42,7 @@ public class MauveListAPI {
     public void start() {
         logger.info("Starting MauveListAPI...");
 
-        initializeConfig();
+        config = ConfigTools.initializeConfig(dataFolder, logger, "config.conf", Config.class, Config::new);
         initializeDatabase();
         initializeCommunication();
 
@@ -77,33 +73,6 @@ public class MauveListAPI {
 
             logger.info("MauveList API Stopped!");
         }
-    }
-
-    private void initializeConfig() {
-        // Data Folder
-        try {
-            Files.createDirectories(dataFolder);
-        }
-        catch (IOException e) {
-            throw new IllegalStateException("Cannot create directory: " + dataFolder);
-        }
-
-        // Initialize Configurate Manager
-        ConfigurateManager configurateManager = new ConfigurateManager(dataFolder.toFile(), logger);
-
-        // Add config
-        configurateManager.add("config.conf", TypeToken.get(Config.class), new Config(), Config::new, ConfigurateFormat.HOCON);
-
-        // Try to save default values
-        if (!configurateManager.saveDefaults("config.conf")) throw new IllegalStateException("Failed to save default config");
-
-        // Load config
-        configurateManager.load("config.conf");
-
-        // Save/update config
-        configurateManager.save("config.conf");
-
-        config = configurateManager.get("config.conf");
     }
 
     private void initializeDatabase() {

@@ -1,0 +1,27 @@
+package net.mattlabs.mauvelist.discord.config;
+
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+
+/**
+ * Represents MauveList Discord bot's configuration file, saved to the program data folder as {@code config.conf} with
+ * HOCON formatting.
+ *
+ * <p>This class is serialized into the config file and deserialized from the config file via Configurate. On program
+ * load, either the config is created using the default field values of this file, or they are set using the values
+ * in the existing config file.</p>
+ *
+ * <p>The public methods of this class provide the config values once loaded.</p>
+ */
+@SuppressWarnings({"FieldMayBeFinal"})
+@ConfigSerializable
+public class Config {
+
+    @Setting(value = "_mattIsAwesome")
+    @Comment("""
+            MauveList Discord Bot Configuration
+            By Mattboy9921
+            https://github.com/mattboy9921/MauveList""")
+    private boolean _mattIsAwesome = true;
+}

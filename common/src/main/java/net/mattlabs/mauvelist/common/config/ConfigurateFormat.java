@@ -1,4 +1,4 @@
-package net.mattlabs.mauvelist.common;
+package net.mattlabs.mauvelist.common.config;
 
 public enum ConfigurateFormat {
     HOCON,

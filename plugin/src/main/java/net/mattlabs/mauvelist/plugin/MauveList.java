@@ -1,8 +1,8 @@
 package net.mattlabs.mauvelist.plugin;
 
 import io.leangen.geantyref.TypeToken;
-import net.mattlabs.mauvelist.common.ConfigurateFormat;
-import net.mattlabs.mauvelist.common.ConfigurateManager;
+import net.mattlabs.mauvelist.common.config.ConfigurateFormat;
+import net.mattlabs.mauvelist.common.config.ConfigurateManager;
 import net.mattlabs.mauvelist.plugin.communication.CommunicationManager;
 import net.mattlabs.mauvelist.plugin.config.Config;
 import net.mattlabs.mauvelist.plugin.listeners.JoinListener;
