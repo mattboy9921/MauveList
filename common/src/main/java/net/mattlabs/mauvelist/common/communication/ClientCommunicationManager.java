@@ -24,7 +24,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
-public class CommunicationManager {
+public class ClientCommunicationManager {
 
     private final HttpClient httpClient;
     private final String baseUrl;
@@ -39,7 +39,7 @@ public class CommunicationManager {
     private volatile Instant lastWebSocketPing, lastWebSocketResponse;
     private final AtomicBoolean webSocketConnecting, synchronizing;
 
-    public CommunicationManager(String baseUrl, Logger logger, ConfigurateManager configurateManager) {
+    public ClientCommunicationManager(String baseUrl, Logger logger, ConfigurateManager configurateManager) {
         this.logger = logger;
         logger.info("Initializing communication...");
 
@@ -256,7 +256,7 @@ public class CommunicationManager {
 
                 @Override
                 public void onOpen(WebSocket webSocket) {
-                    CommunicationManager.this.webSocket = webSocket;
+                    ClientCommunicationManager.this.webSocket = webSocket;
                     lastWebSocketPing = Instant.now();
                     lastWebSocketResponse = Instant.now();
 
@@ -299,8 +299,8 @@ public class CommunicationManager {
                 public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
                     logger.warning("MauveList API WebSocket disconnected: " + statusCode + " " + reason);
 
-                    if (CommunicationManager.this.webSocket == webSocket) {
-                        CommunicationManager.this.webSocket = null;
+                    if (ClientCommunicationManager.this.webSocket == webSocket) {
+                        ClientCommunicationManager.this.webSocket = null;
                     }
 
                     return null;
@@ -310,8 +310,8 @@ public class CommunicationManager {
                 public void onError(WebSocket webSocket, Throwable error) {
                     if (healthy) logger.warning("MauveList API WebSocket error: " + error.getMessage());
 
-                    if (CommunicationManager.this.webSocket == webSocket) {
-                        CommunicationManager.this.webSocket = null;
+                    if (ClientCommunicationManager.this.webSocket == webSocket) {
+                        ClientCommunicationManager.this.webSocket = null;
                     }
                 }
 

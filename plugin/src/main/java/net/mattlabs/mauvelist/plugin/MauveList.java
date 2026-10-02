@@ -1,6 +1,6 @@
 package net.mattlabs.mauvelist.plugin;
 
-import net.mattlabs.mauvelist.common.communication.CommunicationManager;
+import net.mattlabs.mauvelist.common.communication.ClientCommunicationManager;
 import net.mattlabs.mauvelist.common.config.ConfigTools;
 import net.mattlabs.mauvelist.common.config.ConfigurateManager;
 import net.mattlabs.mauvelist.plugin.config.Config;
@@ -16,7 +16,7 @@ public class MauveList extends JavaPlugin {
     private ConfigurateManager configurateManager;
     private Config config;
     private static MauveList instance;
-    private CommunicationManager communicationManager;
+    private ClientCommunicationManager clientCommunicationManager;
 
     public void onEnable() {
         instance = this;
@@ -36,7 +36,7 @@ public class MauveList extends JavaPlugin {
         int port = config.getConnection().getPort();
         String baseURL = "http://" + hostname + ":" + port;
 
-        communicationManager = new CommunicationManager(baseURL, logger, configurateManager);
+        clientCommunicationManager = new ClientCommunicationManager(baseURL, logger, configurateManager);
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new JoinListener(), this);
@@ -48,7 +48,7 @@ public class MauveList extends JavaPlugin {
     public void onDisable() {
         logger.info("Disabling MauveList plugin...");
 
-        communicationManager.shutdown();
+        clientCommunicationManager.shutdown();
 
         logger.info("MauveList plugin disabled!");
     }
@@ -57,8 +57,8 @@ public class MauveList extends JavaPlugin {
         return instance;
     }
 
-    public CommunicationManager getCommunicationManager() {
-        return communicationManager;
+    public ClientCommunicationManager getCommunicationManager() {
+        return clientCommunicationManager;
     }
 
     public ConfigurateManager getConfigurateManager() {

@@ -1,6 +1,6 @@
 package net.mattlabs.mauvelist.plugin.listeners;
 
-import net.mattlabs.mauvelist.common.communication.CommunicationManager;
+import net.mattlabs.mauvelist.common.communication.ClientCommunicationManager;
 import net.mattlabs.mauvelist.common.communication.Endpoints;
 import net.mattlabs.mauvelist.common.records.ApiRequest;
 import net.mattlabs.mauvelist.common.records.PlayerActivityRequest;
@@ -15,10 +15,10 @@ import java.time.Instant;
 
 public class LeaveListener implements Listener {
 
-    private final CommunicationManager communicationManager;
+    private final ClientCommunicationManager clientCommunicationManager;
 
     public LeaveListener() {
-        communicationManager = MauveList.getInstance().getCommunicationManager();
+        clientCommunicationManager = MauveList.getInstance().getCommunicationManager();
     }
 
     @EventHandler
@@ -36,6 +36,6 @@ public class LeaveListener implements Listener {
         PlayerActivityRequest playerActivityRequest = new PlayerActivityRequest(player.getName(), Instant.now());
         ApiRequest<PlayerActivityRequest> request = new ApiRequest<>(Endpoints.playerActivity(player.getUniqueId()), playerActivityRequest);
 
-        communicationManager.sendPostRequest(request);
+        clientCommunicationManager.sendPostRequest(request);
     }
 }
