@@ -6,8 +6,10 @@ import net.mattlabs.mauvelist.common.config.ConfigurateManager;
 import net.mattlabs.mauvelist.plugin.config.Config;
 import net.mattlabs.mauvelist.plugin.listeners.JoinListener;
 import net.mattlabs.mauvelist.plugin.listeners.LeaveListener;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MauveList extends JavaPlugin {
@@ -24,23 +26,29 @@ public class MauveList extends JavaPlugin {
         logger = getLogger();
         logger.info("Starting Mauvelist plugin...");
 
-        configurateManager = new ConfigurateManager(getDataFolder(), getLogger());
-        config = ConfigTools.initializeConfig(
-                getDataPath(),
-                configurateManager,
-                "config.conf",
-                Config.class,
-                Config::new);
+        try {
+            configurateManager = new ConfigurateManager(getDataFolder(), getLogger());
+            config = ConfigTools.initializeConfig(
+                    getDataPath(),
+                    configurateManager,
+                    "config.conf",
+                    Config.class,
+                    Config::new);
 
-        String hostname = config.getConnection().getHostname();
-        int port = config.getConnection().getPort();
-        String baseURL = "http://" + hostname + ":" + port;
+            String hostname = config.getConnection().getHostname();
+            int port = config.getConnection().getPort();
+            String baseURL = "http://" + hostname + ":" + port;
 
-        clientCommunicationManager = new ClientCommunicationManager(baseURL, logger, configurateManager);
+            clientCommunicationManager = new ClientCommunicationManager(baseURL, logger, configurateManager);
 
-        // Register listeners
-        getServer().getPluginManager().registerEvents(new JoinListener(), this);
-        getServer().getPluginManager().registerEvents(new LeaveListener(), this);
+            // Register listeners
+            getServer().getPluginManager().registerEvents(new JoinListener(), this);
+            getServer().getPluginManager().registerEvents(new LeaveListener(), this);
+        }
+        catch (Exception e) {
+            logger.log(Level.SEVERE, "MauveList plugin startup failed!", e);
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
 
         logger.info("Mauvelist plugin started!");
     }

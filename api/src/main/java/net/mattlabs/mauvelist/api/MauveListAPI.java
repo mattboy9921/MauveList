@@ -10,6 +10,7 @@ import net.mattlabs.mauvelist.common.logging.LoggingTools;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MauveListAPI {
@@ -43,15 +44,22 @@ public class MauveListAPI {
     public void start() {
         logger.info("Starting MauveListAPI...");
 
-        config = ConfigTools.initializeConfig(
-                dataFolder,
-                new ConfigurateManager(dataFolder.toFile(), logger),
-                "config.conf",
-                Config.class,
-                Config::new);
+        try {
+            config = ConfigTools.initializeConfig(
+                    dataFolder,
+                    new ConfigurateManager(dataFolder.toFile(), logger),
+                    "config.conf",
+                    Config.class,
+                    Config::new);
 
-        initializeDatabase();
-        initializeCommunication();
+            initializeDatabase();
+            initializeCommunication();
+        }
+        catch (Exception e) {
+            logger.log(Level.SEVERE, "MauveList API startup failed!", e);
+            stop();
+            return;
+        }
 
         logger.info("MauveList API started!");
     }
