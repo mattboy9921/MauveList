@@ -72,7 +72,7 @@ public class MauveListDiscord {
         if (stopping.compareAndSet(false, true)) {
             logger.info("Stopping MauveList Discord bot...");
 
-            clientCommunicationManager.shutdown();
+            if (clientCommunicationManager != null) clientCommunicationManager.shutdown();
             if (jda != null) jda.shutdown();
 
             logger.info("MauveList Discord bot stopped!");

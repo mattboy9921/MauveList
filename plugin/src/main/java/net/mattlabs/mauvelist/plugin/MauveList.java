@@ -48,7 +48,7 @@ public class MauveList extends JavaPlugin {
     public void onDisable() {
         logger.info("Disabling MauveList plugin...");
 
-        clientCommunicationManager.shutdown();
+        if (clientCommunicationManager != null) clientCommunicationManager.shutdown();
 
         logger.info("MauveList plugin disabled!");
     }
