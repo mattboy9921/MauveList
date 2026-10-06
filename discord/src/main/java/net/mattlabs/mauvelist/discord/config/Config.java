@@ -32,4 +32,11 @@ public class Config {
     public Connection getConnection() {
         return connection;
     }
+
+    @Comment("\nThe bot token you will use for applications")
+    private String botToken = "paste-your-bot-token-here";
+
+    public String getBotToken() {
+        return botToken;
+    }
 }
