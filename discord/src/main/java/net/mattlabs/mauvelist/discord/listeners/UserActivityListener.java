@@ -3,6 +3,9 @@ package net.mattlabs.mauvelist.discord.listeners;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.events.guild.scheduledevent.ScheduledEventUserAddEvent;
+import net.dv8tion.jda.api.events.guild.scheduledevent.ScheduledEventUserRemoveEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.api.events.message.poll.MessagePollVoteAddEvent;
@@ -70,6 +73,23 @@ public class UserActivityListener extends ListenerAdapter {
     @Override
     public void onGuildMemberRemove(GuildMemberRemoveEvent event) {
         onUserActivity(event.getUser());
+    }
+
+    // Events
+    @Override
+    public void onScheduledEventUserAdd(ScheduledEventUserAddEvent event) {
+        onUserActivity(event.retrieveUser().complete());
+    }
+
+    @Override
+    public void onScheduledEventUserRemove(ScheduledEventUserRemoveEvent event) {
+        onUserActivity(event.retrieveUser().complete());
+    }
+
+    // Voice
+    @Override
+    public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
+        onUserActivity(event.getEntity().getUser());
     }
 
     private void onUserActivity(User user) {
