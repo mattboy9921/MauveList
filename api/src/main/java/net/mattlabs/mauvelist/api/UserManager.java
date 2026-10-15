@@ -2,6 +2,7 @@ package net.mattlabs.mauvelist.api;
 
 import net.mattlabs.mauvelist.api.database.UserRepository;
 
+import java.time.Instant;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -15,18 +16,33 @@ public class UserManager {
         logger = MauveListAPI.getInstance().getLogger();
     }
 
-    public User getUser(UUID uuid) {
-        return userRepository.findUserByUUID(uuid);
+    public User getUserFromMinecraftUUID(UUID uuid) {
+        return userRepository.findUserByMinecraftUUID(uuid);
     }
 
-    public void updateLastSeen(User user) {
-        // Check if user exists and update, if not, create
-        if (userRepository.findUserByUUID(user.getMinecraftUUID()) != null) {
-            userRepository.updateLastSeen(user.getMinecraftUUID(), user.getLastSeenAt());
+    public User getUserFromDiscordUserID(long discordUserID) {
+        return userRepository.findUserByDiscordUserID(discordUserID);
+    }
+
+    public void updateLastSeenOnMinecraft(UUID uuid, String username, Instant lastSeenAt, boolean preexisting) {
+        // Check if Minecraft account exists and update, if not, create
+        if (userRepository.findUserByMinecraftUUID(uuid) != null) {
+            userRepository.updateLastSeenOnMinecraft(uuid, lastSeenAt);
         }
         else {
-            logger.info("User " + user.getMinecraftUUID() + " not found, creating new user.");
-            userRepository.createUser(user);
+            logger.info("User linked to UUID " + uuid + " not found, creating new user.");
+            userRepository.createUserFromMinecraftAccount(uuid, username, lastSeenAt, preexisting);
+        }
+    }
+
+    public void updateLastSeenOnDiscord(long discordUserID, String username, Instant lastSeenAt, boolean preexisting) {
+        // Check if Discord account exists and update, if not, create
+        if (userRepository.findUserByDiscordUserID(discordUserID) != null) {
+            userRepository.updateLastSeenOnDiscord(discordUserID, lastSeenAt);
+        }
+        else {
+            logger.info("User linked to Discord user ID " + discordUserID + " not found, creating new user.");
+            userRepository.createUserFromDiscordAccount(discordUserID, username, lastSeenAt, preexisting);
         }
     }
 }

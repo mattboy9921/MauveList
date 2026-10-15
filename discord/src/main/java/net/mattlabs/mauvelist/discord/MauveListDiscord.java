@@ -8,8 +8,10 @@ import net.mattlabs.mauvelist.common.config.ConfigTools;
 import net.mattlabs.mauvelist.common.config.ConfigurateManager;
 import net.mattlabs.mauvelist.common.logging.LoggingTools;
 import net.mattlabs.mauvelist.discord.config.Config;
+import net.mattlabs.mauvelist.discord.listeners.UserActivityListener;
 
 import java.nio.file.Path;
+import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,8 +25,11 @@ public class MauveListDiscord {
     private ClientCommunicationManager clientCommunicationManager;
     private JDA jda;
     private final AtomicBoolean stopping = new AtomicBoolean(false);
+    private static MauveListDiscord instance;
 
     public MauveListDiscord() {
+        instance = this;
+
         logger = LoggingTools.initializeLogging(MauveListDiscord.class.getName());
 
         this.dataFolder = Path.of("MauveListDiscord");
@@ -83,7 +88,15 @@ public class MauveListDiscord {
         logger.info("Initializing Discord connection...");
 
         try {
-            jda = JDABuilder.createDefault(config.getBotToken(), GatewayIntent.GUILD_MEMBERS)
+            jda = JDABuilder.createDefault(config.getBotToken(),
+                            EnumSet.of(
+                                    GatewayIntent.GUILD_MESSAGES,
+                                    GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                                    GatewayIntent.GUILD_MESSAGE_POLLS,
+                                    GatewayIntent.GUILD_MEMBERS
+                            )
+                    )
+                    .addEventListeners(new UserActivityListener())
                     .build()
                     .awaitReady();
 
@@ -92,5 +105,13 @@ public class MauveListDiscord {
         catch (Exception e) {
             throw new IllegalStateException("Failed to initialize Discord connection!", e);
         }
+    }
+
+    public static MauveListDiscord getInstance() {
+        return instance;
+    }
+
+    public ClientCommunicationManager getClientCommunicationManager() {
+        return clientCommunicationManager;
     }
 }

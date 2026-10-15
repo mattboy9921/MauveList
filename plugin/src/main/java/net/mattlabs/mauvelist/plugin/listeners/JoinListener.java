@@ -3,7 +3,7 @@ package net.mattlabs.mauvelist.plugin.listeners;
 import net.mattlabs.mauvelist.common.communication.ClientCommunicationManager;
 import net.mattlabs.mauvelist.common.communication.Endpoints;
 import net.mattlabs.mauvelist.common.records.ApiRequest;
-import net.mattlabs.mauvelist.common.records.PlayerActivityRequest;
+import net.mattlabs.mauvelist.common.records.MinecraftActivityRequest;
 import net.mattlabs.mauvelist.plugin.MauveList;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,8 +25,8 @@ public class JoinListener implements Listener {
 
         Player player = event.getPlayer();
 
-        PlayerActivityRequest playerActivityRequest = new PlayerActivityRequest(player.getName(), Instant.now());
-        ApiRequest<PlayerActivityRequest> request = new ApiRequest<>(Endpoints.playerActivity(player.getUniqueId()), playerActivityRequest);
+        MinecraftActivityRequest minecraftActivityRequest = new MinecraftActivityRequest(player.getName(), Instant.now());
+        ApiRequest<MinecraftActivityRequest> request = new ApiRequest<>(Endpoints.minecraftActivity(player.getUniqueId()), minecraftActivityRequest);
 
         clientCommunicationManager.sendPostRequest(request);
     }

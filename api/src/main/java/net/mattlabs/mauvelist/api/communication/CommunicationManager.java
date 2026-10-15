@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.javalin.Javalin;
 import io.javalin.json.JavalinJackson;
 
+import java.util.UUID;
+
 public class CommunicationManager {
 
     private final Javalin app;
@@ -23,11 +25,16 @@ public class CommunicationManager {
 
             config.jsonMapper(jackson);
 
+            // UUID Mapping
+            config.validation.register(UUID.class, UUID::fromString);
+
             // Routes
             config.routes.get("/api/v1/health", new HealthController()::getHealth);
 
-            config.routes.get("/api/v1/users/{uuid}", userController::getUser);
-            config.routes.post("/api/v1/users/{uuid}/activity", userController::playerActivity);
+            config.routes.get("/api/v1/users/minecraft/{minecraftUUID}", userController::getUserFromMinecraftUUID);
+            config.routes.get("/api/v1/users/discord/{discordUserID}", userController::getUserFromDiscordUserID);
+            config.routes.post("/api/v1/users/minecraft/{minecraftUUID}/activity", userController::minecraftActivity);
+            config.routes.post("/api/v1/users/discord/{discordUserID}/activity", userController::discordActivity);
 
             config.routes.get("/api/v1/change-events", new ChangeEventController()::getEvents);
 

@@ -1,59 +1,49 @@
 package net.mattlabs.mauvelist.api;
 
 import java.time.Instant;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 public class User {
 
-    private final UUID minecraftUUID;
-    private String minecraftUsername;
-    private Long discordUserID;
+    private final long id;
     private final Instant createdAt;
-    private Instant lastSeenAt;
     private final boolean preexisting;
+    private List<MinecraftAccount> minecraftAccounts;
+    private DiscordAccount discordAccount;
 
-    public User(UUID minecraftUUID, String minecraftUsername, Long discordUserID, Instant createdAt, Instant lastSeenAt, boolean preexisting) {
-        this.minecraftUUID = minecraftUUID;
-        this.minecraftUsername = minecraftUsername;
-        this.discordUserID = discordUserID;
+    public User(long id, Instant createdAt, boolean preexisting) {
+        this.id = id;
         this.createdAt = createdAt;
-        this.lastSeenAt = lastSeenAt;
         this.preexisting = preexisting;
+        minecraftAccounts = new ArrayList<>();
     }
 
-    public UUID getMinecraftUUID() {
-        return minecraftUUID;
-    }
-
-    public String getMinecraftUsername() {
-        return minecraftUsername;
-    }
-
-    public Long getDiscordUserID() {
-        return discordUserID;
+    public long getId() {
+        return id;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public Instant getLastSeenAt() {
-        return lastSeenAt;
-    }
-
     public boolean isPreexisting() {
         return preexisting;
     }
 
-    public void setMinecraftUsername(String minecraftUsername) {
-        this.minecraftUsername = minecraftUsername;
+    public List<MinecraftAccount> getMinecraftAccounts() {
+        return minecraftAccounts;
     }
 
-    public void setDiscordUserID(long discordUserID) {
-        this.discordUserID = discordUserID;
+    public DiscordAccount getDiscordAccount() {
+        return discordAccount;
     }
 
-    public void setLastSeenAt(Instant lastSeenAt) {
-        this.lastSeenAt = lastSeenAt;
+    public void setMinecraftAccounts(List<MinecraftAccount> minecraftAccounts) {
+        this.minecraftAccounts = minecraftAccounts;
+    }
+
+    public void setDiscordAccount(DiscordAccount discordAccount) {
+        this.discordAccount = discordAccount;
     }
 }

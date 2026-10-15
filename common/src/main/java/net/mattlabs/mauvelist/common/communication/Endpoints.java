@@ -9,7 +9,11 @@ public final class Endpoints {
     private  Endpoints() {
     }
 
-    public static String playerActivity(UUID minecraftUUID) {
-        return basePath + "/users/" + minecraftUUID + "/activity";
+    public static String minecraftActivity(UUID minecraftUUID) {
+        return basePath + "/users/minecraft/" + minecraftUUID + "/activity";
+    }
+
+    public static String discordActivity(long discordUserID) {
+        return basePath + "/users/discord/" + discordUserID + "/activity";
     }
 }

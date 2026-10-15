@@ -1,15 +1,36 @@
 CREATE TABLE users (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    minecraft_uuid CHAR(36) NOT NULL,
-    minecraft_username VARCHAR(16) NOT NULL,
-    discord_user_id BIGINT UNSIGNED NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_seen_at TIMESTAMP NULL,
     preexisting BOOLEAN NOT NULL DEFAULT FALSE,
 
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE minecraft_accounts (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_id BIGINT UNSIGNED NOT NULL,
+    minecraft_uuid CHAR(36) NOT NULL,
+    minecraft_username VARCHAR(16) NOT NULL,
+    last_seen_at TIMESTAMP NULL,
+
     PRIMARY KEY (id),
-    UNIQUE KEY uq_users_minecraft_uuid (minecraft_uuid),
-    UNIQUE KEY uq_users_discord_user_id (discord_user_id)
+    UNIQUE KEY uq_minecraft_accounts_uuid (minecraft_uuid),
+
+    CONSTRAINT accounts_user FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE discord_accounts (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_id BIGINT UNSIGNED NOT NULL,
+    discord_user_id BIGINT UNSIGNED NOT NULL,
+    discord_username VARCHAR(32) NOT NULL,
+    last_seen_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_discord_accounts_discord_user_id (discord_user_id),
+    UNIQUE KEY uq_discord_accounts_user_id (user_id),
+
+    CONSTRAINT fk_discord_accounts_user FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE application_questionnaires (
